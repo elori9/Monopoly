@@ -2,14 +2,13 @@ package game.model.box
 
 import game.model.Player
 
-class Fee
-    (
+class Start(
     position: Int,
     name: String,
     val money: Int
-) : Box(position, name, BoxType.FEE) {
+) : Box(position, name, BoxType.START) {
 
     override fun action(player: Player) {
-        player.pay(money)
+        player.deposit(money)
     }
 }
