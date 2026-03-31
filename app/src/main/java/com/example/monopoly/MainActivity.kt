@@ -26,8 +26,19 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MonopolyTheme {
+                val context = LocalContext.current
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainMenuScreen(modifier = Modifier.padding(innerPadding))
+                    MainMenuScreen(
+                        modifier = Modifier.padding(innerPadding),
+                        onNewGameClick = {
+                            startActivity(Intent(context, ConfigActivity::class.java))
+                        },
+                        onHelpClick = {
+                            // TODO: HELP SCREEN
+                        },
+                        onExitClick = {
+                            exitProcess(0)
+                        })
                 }
             }
         }
@@ -35,8 +46,12 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainMenuScreen(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
+fun MainMenuScreen(
+    modifier: Modifier = Modifier,
+    onNewGameClick: () -> Unit,
+    onHelpClick: () -> Unit,
+    onExitClick: () -> Unit
+) {
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -56,9 +71,7 @@ fun MainMenuScreen(modifier: Modifier = Modifier) {
             .padding(vertical = 8.dp)
 
         Button(
-            onClick = {
-                context.startActivity(Intent(context, ConfigActivity::class.java))
-            },
+            onClick = onNewGameClick,
             modifier = buttonModifier,
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
@@ -67,7 +80,7 @@ fun MainMenuScreen(modifier: Modifier = Modifier) {
         }
 
         Button(
-            onClick = { /* TODO: Help */ },
+            onClick = onHelpClick,
             modifier = buttonModifier,
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
@@ -76,10 +89,7 @@ fun MainMenuScreen(modifier: Modifier = Modifier) {
         }
 
         Button(
-            onClick = {
-                // Exit app
-                exitProcess(0)
-            },
+            onClick = onExitClick,
             modifier = buttonModifier,
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
@@ -93,6 +103,10 @@ fun MainMenuScreen(modifier: Modifier = Modifier) {
 @Composable
 fun MainMenuPreview() {
     MonopolyTheme {
-        MainMenuScreen()
+        MainMenuScreen(
+            onNewGameClick = {},
+            onHelpClick = {},
+            onExitClick = {}
+        )
     }
 }
