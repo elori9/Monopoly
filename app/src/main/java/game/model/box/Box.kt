@@ -10,5 +10,5 @@ abstract class Box(
     /**
      * Make an action on the box
      */
-    abstract fun action(player: Player)
+    abstract fun action(player: Player): String
 }

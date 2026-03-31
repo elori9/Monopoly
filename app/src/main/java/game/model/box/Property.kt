@@ -13,7 +13,7 @@ class Property(
     var owner: Player? = null
     var numHouses: Int = 0
 
-    override fun action(player: Player) {
+    override fun action(player: Player): String {
         if (owner != null && owner != player) {
             // Someone felt on a property:
             // Not my house, not buy
@@ -24,5 +24,6 @@ class Property(
             // Give the money for the owner
             owner?.deposit(currentRent)
         }
+        return ""
     }
 }

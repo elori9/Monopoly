@@ -8,7 +8,8 @@ class Start(
     val money: Int
 ) : Box(position, name, BoxType.START) {
 
-    override fun action(player: Player) {
+    override fun action(player: Player): String {
         player.deposit(money)
+        return ""
     }
 }

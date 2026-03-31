@@ -1,6 +1,7 @@
 package game.interfaces
 
 import game.model.Player
+import game.model.TurnAction
 import game.model.box.Property
 
 /**
@@ -14,6 +15,13 @@ interface GameView {
      * @param message the message
      */
     fun showMessage(message: String)
+
+    /**
+     * Show options on the start
+     * @param player the player
+     * @param onActionSelected the callback with the action
+     */
+    fun showTurnOptions(player: Player, onActionSelected: (TurnAction) -> Unit)
 
     /**
      * Show dice roll
@@ -51,11 +59,11 @@ interface GameView {
     fun askToBuyProperty(property: Property, player: Player, onDecision: (Boolean) -> Unit)
 
     /**
-     * Ask the player to build a house
-     * @param property the property
-     * @param onDecision the callback
+     * Ask the player to select a property to build a house
+     * @param properties list of properties where the player can build
+     * @param onSelected callback with the selected property
      */
-    fun askToBuildHouse(property: Property, onDecision: (Boolean) -> Unit)
+    fun askToSelectPropertyToBuild(properties: List<Property>, onSelected: (Property?) -> Unit)
 
     /**
      * Show game over
