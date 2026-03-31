@@ -107,4 +107,12 @@ class Player(
 
         return totalNetworth
     }
+
+    // --- TESTING ---
+    /**
+     * For testing
+     */
+    fun setBroke(bool: Boolean) {
+        broke = bool
+    }
 }
