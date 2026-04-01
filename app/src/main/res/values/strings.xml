@@ -25,4 +25,7 @@
     <string name="FeeLabel">Fee</string>
     <string name="BoxesInfo">Boxes (click to expand)</string>
     <string name="Instructions">This fast-paced, adapted Monopoly supports two to four players with custom names and features a dynamic board that scales based on the player count.\n\nGameplay is streamlined: simply roll the dice, move your token, and resolve the square\'s action. The board consists of five square types: Start to collect money, Properties to buy and develop, Fees that tax your funds, Cards for unexpected luck events, and Jail.\n\nColor group restriction is removed, allowing you to build houses immediately on any owned property to increase the rent opponents must pay. Beware the strict Jail square, which instantly forces you to skip your next three turns.\n\nThe game ends when opponents cannot pay their debts and go bankrupt, leaving a sole survivor. Alternatively, if you enable the optional timer, the match ends when the countdown hits zero, crowning the player with the highest combined net worth of cash and properties as the winner.</string>
+    <string name="AdditionalInfoTitle">Additional Information</string>
+    <string name="AdditionalInfoText">For more information you can visit our project on GitHub</string>
+    <string name="Searching">Searching…</string>
 </resources>

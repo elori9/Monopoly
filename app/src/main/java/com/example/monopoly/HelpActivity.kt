@@ -1,7 +1,9 @@
 package com.example.monopoly
 
+import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -31,6 +33,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.ui.theme.MonopolyTheme
+
+object Constants {
+    const val GITHUB_LINK = "https://github.com/"
+}
 
 class HelpActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,7 +68,16 @@ fun HelpScreen(modifier: Modifier = Modifier) {
                 context.startActivity(intent)
             },
             onBoxClick = { resId -> expandedImageRes = resId },
-            modifier = Modifier.fillMaxSize()
+            onClickButton = {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.Searching),
+                    Toast.LENGTH_LONG
+                ).show()
+                val intent = Intent(Intent.ACTION_WEB_SEARCH)
+                intent.putExtra(SearchManager.QUERY, Constants.GITHUB_LINK)
+                context.startActivity(intent)
+            }
         )
 
         // Overlay for enlarged image
@@ -97,6 +112,7 @@ fun HelpScreen(modifier: Modifier = Modifier) {
 fun HelpContent(
     onBackClick: () -> Unit,
     onBoxClick: (Int) -> Unit,
+    onClickButton: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Scroll
@@ -161,6 +177,11 @@ fun HelpContent(
         SectionTitle(stringResource(R.string.BoxesInfo))
         ShowBoxes(onBoxClick)
         Spacer(modifier = Modifier.height(24.dp))
+
+        // Show additional info
+        SectionTitle(stringResource(R.string.AdditionalInfoTitle))
+        ShowAdditionalInfo(onClickButton)
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -218,10 +239,22 @@ fun ShowSpecialBoxes(onBoxClick: (Int) -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        TokenPreview(imageId = R.drawable.icon7, stringResource(R.string.StartLabel), onClick = { onBoxClick(R.drawable.icon7) })
-        TokenPreview(imageId = R.drawable.icon8, stringResource(R.string.JailLabel), onClick = { onBoxClick(R.drawable.icon8) })
-        TokenPreview(imageId = R.drawable.icon9, stringResource(R.string.LuckLabel), onClick = { onBoxClick(R.drawable.icon9) })
-        TokenPreview(imageId = R.drawable.icon10, stringResource(R.string.FeeLabel), onClick = { onBoxClick(R.drawable.icon10) })
+        TokenPreview(
+            imageId = R.drawable.icon7,
+            stringResource(R.string.StartLabel),
+            onClick = { onBoxClick(R.drawable.icon7) })
+        TokenPreview(
+            imageId = R.drawable.icon8,
+            stringResource(R.string.JailLabel),
+            onClick = { onBoxClick(R.drawable.icon8) })
+        TokenPreview(
+            imageId = R.drawable.icon9,
+            stringResource(R.string.LuckLabel),
+            onClick = { onBoxClick(R.drawable.icon9) })
+        TokenPreview(
+            imageId = R.drawable.icon10,
+            stringResource(R.string.FeeLabel),
+            onClick = { onBoxClick(R.drawable.icon10) })
     }
 }
 
@@ -280,3 +313,30 @@ fun TokenPreview(imageId: Int, label: String, onClick: (() -> Unit)? = null) {
         }
     }
 }
+
+@Composable
+fun ShowAdditionalInfo(onClick: () -> Unit) {
+    Row (
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(id = R.string.AdditionalInfoText),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 8.dp, end = 8.dp)
+
+        )
+        ElevatedButton(
+            modifier = Modifier.padding(vertical = 10.dp),
+            elevation = ButtonDefaults.elevatedButtonElevation(5.dp),
+            onClick = onClick
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.icon19),
+                contentDescription = "Github repo",
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
+
