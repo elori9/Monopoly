@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.ui.theme.MonopolyTheme
@@ -135,23 +136,46 @@ fun HelpContent(
             text = stringResource(R.string.Instructions),
             fontSize = 16.sp,
             lineHeight = 28.sp,
-            modifier = Modifier.padding(horizontal = 8.dp)
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.fillMaxWidth()
         )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
         // Pieces
+        SectionTitle(stringResource(R.string.PiecesInfo))
         ShowPieces()
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Money
-        ShowMoney()
-
-        // Houses
-        ShowHouse()
+        SectionTitle(stringResource(R.string.EconomyInfo))
+        ShowEconomy()
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Show special boxes
-        ShowSpecialBoxes()
+        SectionTitle(stringResource(R.string.SpecialBoxesInfo))
+        ShowSpecialBoxes(onBoxClick)
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Show boxes (Passing the click callback)
+        SectionTitle(stringResource(R.string.BoxesInfo))
         ShowBoxes(onBoxClick)
+        Spacer(modifier = Modifier.height(24.dp))
     }
+}
+
+/**
+ * Tittles more beautiful
+ */
+@Composable
+fun SectionTitle(title: String) {
+    Text(
+        text = title,
+        fontSize = 22.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color(0xFF03A9F4),
+        modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
+    )
 }
 
 /**
@@ -159,11 +183,6 @@ fun HelpContent(
  */
 @Composable
 fun ShowPieces() {
-    Text(
-        text = stringResource(R.string.PiecesInfo),
-        fontSize = 20.sp,
-        modifier = Modifier.padding(start = 8.dp, end = 2.dp)
-    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
@@ -179,46 +198,30 @@ fun ShowPieces() {
  * Show Money
  */
 @Composable
-fun ShowMoney() {
-    Text(
-        text = stringResource(R.string.MoneyInfo),
-        fontSize = 20.sp,
-        modifier = Modifier.padding(start = 20.dp, end = 2.dp)
-    )
-    TokenPreview(imageId = R.drawable.icon5, label = "")
+fun ShowEconomy() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        TokenPreview(imageId = R.drawable.icon5, label = stringResource(R.string.MoneyInfo))
+        TokenPreview(imageId = R.drawable.icon6, label = stringResource(R.string.HouseInfo))
+    }
 }
 
-/**
- * Show the house
- */
-@Composable
-fun ShowHouse() {
-    Text(
-        text = stringResource(R.string.HouseInfo),
-        fontSize = 20.sp,
-        modifier = Modifier.padding(start = 20.dp, end = 2.dp)
-    )
-    TokenPreview(imageId = R.drawable.icon6, label = "")
-}
 
 /**
  * Show special boxes
  */
 @Composable
-fun ShowSpecialBoxes() {
-    Text(
-        text = stringResource(R.string.SpecialBoxesInfo),
-        fontSize = 20.sp,
-        modifier = Modifier.padding(start = 20.dp, end = 2.dp)
-    )
+fun ShowSpecialBoxes(onBoxClick: (Int) -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        TokenPreview(imageId = R.drawable.icon7, stringResource(R.string.StartLabel))
-        TokenPreview(imageId = R.drawable.icon8, stringResource(R.string.JailLabel))
-        TokenPreview(imageId = R.drawable.icon9, stringResource(R.string.LuckLabel))
-        TokenPreview(imageId = R.drawable.icon10, stringResource(R.string.FeeLabel))
+        TokenPreview(imageId = R.drawable.icon7, stringResource(R.string.StartLabel), onClick = { onBoxClick(R.drawable.icon7) })
+        TokenPreview(imageId = R.drawable.icon8, stringResource(R.string.JailLabel), onClick = { onBoxClick(R.drawable.icon8) })
+        TokenPreview(imageId = R.drawable.icon9, stringResource(R.string.LuckLabel), onClick = { onBoxClick(R.drawable.icon9) })
+        TokenPreview(imageId = R.drawable.icon10, stringResource(R.string.FeeLabel), onClick = { onBoxClick(R.drawable.icon10) })
     }
 }
 
@@ -227,11 +230,6 @@ fun ShowSpecialBoxes() {
  */
 @Composable
 fun ShowBoxes(onBoxClick: (Int) -> Unit) {
-    Text(
-        text = stringResource(R.string.BoxesInfo),
-        fontSize = 20.sp,
-        modifier = Modifier.padding(start = 20.dp, end = 2.dp)
-    )
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
