@@ -10,4 +10,17 @@
     <string name="StartGame">Start Game</string>
     <string name="title_activity_help">HelpActivity</string>
     <string name="HowPlay">How to Play</string>
+    <string name="PiecesInfo">The pieces are the following: </string>
+    <string name="LlamaLabel">Llama</string>
+    <string name="PickaxeLabel">Pickaxe</string>
+    <string name="ChestLabel">Chest</string>
+    <string name="ShieldLabel">Shield</string>
+    <string name="MoneyInfo">The money icon is the following: </string>
+    <string name="HouseInfo">The house icon is the following: </string>
+    <string name="SpecialBoxesInfo">The special boxes are: </string>
+    <string name="StartLabel">Start</string>
+    <string name="JailLabel">Jail</string>
+    <string name="LuckLabel">Luck</string>
+    <string name="FeeLabel">Fee</string>
+    <string name="BoxesInfo">The boxes info is: </string>
 </resources>
