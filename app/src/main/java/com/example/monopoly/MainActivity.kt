@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
                             startActivity(Intent(context, ConfigActivity::class.java))
                         },
                         onHelpClick = {
-                            // TODO: HELP SCREEN
+                            startActivity(Intent(context, HelpActivity::class.java))
                         },
                         onExitClick = {
                             exitProcess(0)

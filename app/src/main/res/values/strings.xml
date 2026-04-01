@@ -8,4 +8,6 @@
     <string name="Player">Player</string>
     <string name="AddTimer">Add a timer</string>
     <string name="StartGame">Start Game</string>
+    <string name="title_activity_help">HelpActivity</string>
+    <string name="HowPlay">How to Play</string>
 </resources>

@@ -12,6 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Monopoly">
         <activity
+            android:name=".HelpActivity"
+            android:exported="false"
+            android:label="@string/title_activity_help"
+            android:theme="@style/Theme.Monopoly" />
+        <activity
             android:name=".ConfigActivity"
             android:exported="false" />
         <activity
