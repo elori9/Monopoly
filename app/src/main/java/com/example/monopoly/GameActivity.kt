@@ -13,21 +13,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.monopoly.ui.theme.MonopolyTheme
+import kotlin.concurrent.timer
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         
-        val numPlayers = intent.getIntExtra("NUM_PLAYERS",2)
-        val playerNames = intent.getStringArrayListExtra("PLAYER_NAMES") ?: arrayListOf()
-        
+        val numPlayers = intent?.getIntExtra("NUM_PLAYERS",2)?: 2
+        val playerNames = intent?.getStringArrayListExtra("PLAYER_NAMES") ?: arrayListOf()
+        val timer = intent?.getIntExtra("TIME_LIMIT", 0) ?: 0
         setContent {
             MonopolyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     GameScreen(
                         numPlayers = numPlayers,
                         playerNames = playerNames,
+                        time = timer,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -37,8 +39,8 @@ class GameActivity : ComponentActivity() {
 }
 
 @Composable
-fun GameScreen(numPlayers: Int, playerNames: List<String>, modifier: Modifier = Modifier) {
+fun GameScreen(numPlayers: Int, playerNames: List<String>, time: Int, modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "Game Started with $numPlayers players: ${playerNames.joinToString(", ")}")
+        Text(text = "Game Started with $numPlayers players: ${playerNames.joinToString(", ")} and a time limit of $time")
     }
 }
