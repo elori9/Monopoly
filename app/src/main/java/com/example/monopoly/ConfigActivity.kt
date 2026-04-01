@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -113,32 +114,35 @@ fun ConfigContent(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Select players number
-        PlayerCountSelector(
-            currentCount = numPlayers,
-            onCountSelected = onNumPlayersChange
-        )
+        Column(
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Select players number
+            PlayerCountSelector(
+                currentCount = numPlayers,
+                onCountSelected = onNumPlayersChange
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        // Select players names
-        PlayerNameInputs(
-            numPlayers = numPlayers,
-            playerNames = playerNames,
-            onNameChange = onPlayerNameChange
-        )
+            // Select players names
+            PlayerNameInputs(
+                numPlayers = numPlayers,
+                playerNames = playerNames,
+                onNameChange = onPlayerNameChange
+            )
 
-        Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
-        // Timer
-        TimerConfiguration(
-            isEnabled = isTimerEnabled,
-            timeLimitText = timeLimitText,
-            onToggle = onTimerToggle,
-            onTimeChange = onTimeLimitChange
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
+            // Timer
+            TimerConfiguration(
+                isEnabled = isTimerEnabled,
+                timeLimitText = timeLimitText,
+                onToggle = onTimerToggle,
+                onTimeChange = onTimeLimitChange
+            )
+        }
 
         // Start button
         StartGameButton(
@@ -148,172 +152,165 @@ fun ConfigContent(
     }
 }
 
-    @Composable
-    fun ConfigHeader(onExit: () -> Unit) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Configuration",
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(onClick = onExit) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Exit",
-                        tint = Color.Red,
-                        modifier = Modifier.size(36.dp)
-                    )
-                }
-            }
-            HorizontalDivider(thickness = 2.dp, color = Color.Black)
-        }
-    }
-
-    @Composable
-    fun PlayerCountSelector(
-        currentCount: Int,
-        onCountSelected: (Int) -> Unit
-    ) {
-        Text(
-            text = "Select the number of players",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth()
-        )
-
+@Composable
+fun ConfigHeader(onExit: () -> Unit) {
+    Column {
         Row(
-            Modifier
-                .selectableGroup()
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceAround
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            listOf(2, 3, 4).forEach { number ->
-                Row(
-                    Modifier
-                        .selectable(
-                            selected = (currentCount == number),
-                            onClick = { onCountSelected(number) },
-                            role = Role.RadioButton
-                        )
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = (currentCount == number),
-                        onClick = null,
-                        colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF4CAF50))
-                    )
-                    Text(
-                        text = number.toString(),
-                        fontSize = 24.sp,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
+            Text(
+                text = stringResource(id = R.string.Configuration),
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = onExit) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Exit",
+                    tint = Color.Red,
+                    modifier = Modifier.size(36.dp)
+                )
             }
         }
+        HorizontalDivider(thickness = 2.dp, color = Color.Black)
     }
+}
 
-    @Composable
-    fun PlayerNameInputs(
-        numPlayers: Int,
-        playerNames: List<String>,
-        onNameChange: (Int, String) -> Unit
+@Composable
+fun PlayerCountSelector(
+    currentCount: Int,
+    onCountSelected: (Int) -> Unit
+) {
+    Text(
+        text = stringResource(R.string.SelectPlayers),
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    Row(
+        Modifier
+            .selectableGroup()
+            .fillMaxWidth()
+            .padding(vertical = 16.dp),
+        horizontalArrangement = Arrangement.SpaceAround
     ) {
-        for (i in 0 until 4) {
-            val isEnabled = i < numPlayers
+        listOf(2, 3, 4).forEach { number ->
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                Modifier
+                    .selectable(
+                        selected = (currentCount == number),
+                        onClick = { onCountSelected(number) },
+                        role = Role.RadioButton
+                    )
+                    .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Player ${i + 1}: ",
-                    fontSize = 24.sp,
-                    color = if (isEnabled) Color.Unspecified else Color.LightGray,
-                    modifier = Modifier.width(120.dp)
+                RadioButton(
+                    selected = (currentCount == number),
+                    onClick = null,
+                    colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF4CAF50))
                 )
-                OutlinedTextField(
-                    value = playerNames[i],
-                    onValueChange = { onNameChange(i, it) },
-                    enabled = isEnabled,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledBorderColor = Color.LightGray,
-                        disabledTextColor = Color.LightGray
-                    )
+                Text(
+                    text = number.toString(),
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
         }
     }
+}
 
-    @Composable
-    fun TimerConfiguration(
-        isEnabled: Boolean,
-        timeLimitText: String,
-        onToggle: (Boolean) -> Unit,
-        onTimeChange: (String) -> Unit
-    ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+@Composable
+fun PlayerNameInputs(
+    numPlayers: Int,
+    playerNames: List<String>,
+    onNameChange: (Int, String) -> Unit
+) {
+    for (i in 0 until numPlayers) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.Player) + " ${i + 1}: ",
+                fontSize = 24.sp,
+                modifier = Modifier.width(120.dp)
+            )
+            OutlinedTextField(
+                value = playerNames[i],
+                onValueChange = { onNameChange(i, it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
+fun TimerConfiguration(
+    isEnabled: Boolean,
+    timeLimitText: String,
+    onToggle: (Boolean) -> Unit,
+    onTimeChange: (String) -> Unit
+) {
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.AddTimer),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            Checkbox(
+                checked = isEnabled,
+                onCheckedChange = onToggle,
+                colors = CheckboxDefaults.colors(checkedColor = Color(0xFF03A9F4))
+            )
+        }
+
+        if (isEnabled) {
+            OutlinedTextField(
+                value = timeLimitText,
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() }) onTimeChange(input)
+                },
+                label = { Text("Time Limit (minutes)") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Text(
-                    text = "Add a timer",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                )
-                Checkbox(
-                    checked = isEnabled,
-                    onCheckedChange = onToggle,
-                    colors = CheckboxDefaults.colors(checkedColor = Color(0xFF03A9F4))
-                )
-            }
-
-            if (isEnabled) {
-                OutlinedTextField(
-                    value = timeLimitText,
-                    onValueChange = { input ->
-                        if (input.all { it.isDigit() }) onTimeChange(input)
-                    },
-                    label = { Text("Time Limit (minutes)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                )
-            }
-        }
-    }
-
-    @Composable
-    fun StartGameButton(
-        isEnabled: Boolean,
-        onClick: () -> Unit
-    ) {
-        Button(
-            onClick = onClick,
-            enabled = isEnabled,
-            modifier = Modifier
-                .padding(bottom = 32.dp)
-                .height(56.dp)
-                .width(200.dp),
-            shape = RoundedCornerShape(8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF03A9F4),
-                disabledContainerColor = Color.LightGray
+                    .padding(bottom = 16.dp)
             )
-        ) {
-            Text(text = "Start Game", fontSize = 20.sp, color = Color.White)
         }
     }
+}
+
+@Composable
+fun StartGameButton(
+    isEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = isEnabled,
+        modifier = Modifier
+            .padding(bottom = 32.dp)
+            .height(56.dp)
+            .width(200.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF03A9F4),
+            disabledContainerColor = Color.LightGray
+        )
+    ) {
+        Text(text = stringResource(R.string.StartGame), fontSize = 20.sp, color = Color.White)
+    }
+}

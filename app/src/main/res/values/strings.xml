@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Monopoly</string>
+    <string name="NewGame">New Game</string>
+    <string name="Help">Help</string>
+    <string name="Exit">Exit app</string>
+    <string name="Configuration">Configuration</string>
+    <string name="SelectPlayers">Select the number of players</string>
+    <string name="Player">Player</string>
+    <string name="AddTimer">Add a timer</string>
+    <string name="StartGame">Start Game</string>
 </resources>

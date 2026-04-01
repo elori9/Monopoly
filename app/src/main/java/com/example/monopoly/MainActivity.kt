@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,7 +60,7 @@ fun MainMenuScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Monopoly",
+            text = stringResource(R.string.app_name),
             fontSize = 64.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 64.dp)
@@ -76,7 +77,7 @@ fun MainMenuScreen(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
         ) {
-            Text(text = "New Game", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.NewGame), fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
 
         Button(
@@ -85,7 +86,7 @@ fun MainMenuScreen(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
         ) {
-            Text(text = "Help", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.Help), fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
 
         Button(
@@ -94,7 +95,7 @@ fun MainMenuScreen(
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
         ) {
-            Text(text = "Exit App", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(R.string.Exit), fontSize = 24.sp, fontWeight = FontWeight.Bold)
         }
     }
 }
