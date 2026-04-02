@@ -2,7 +2,7 @@ package game.model
 
 import kotlin.random.Random
 
-class Dice {
+open class Dice {
     // Use private set for make it readable and non-writeable
     var numbers: Int = 0
         private set
@@ -12,7 +12,7 @@ class Dice {
      *
      * @return The result of both combined (2-12)
      */
-    fun roll(): Int {
+    open fun roll(): Int {
         val dice1 = Random.nextInt(1, 7)
         val dice2 = Random.nextInt(1, 7)
 
