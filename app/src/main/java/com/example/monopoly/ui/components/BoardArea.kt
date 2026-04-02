@@ -1,11 +1,13 @@
 package com.example.monopoly.ui.components
 
+import android.icu.text.ListFormatter
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -14,6 +16,8 @@ import game.model.box.GameBox
 import game.model.box.BoxType
 import game.model.box.Start
 import com.example.monopoly.R
+import game.model.Board
+import game.model.box.Jail
 
 @Composable
 fun BoardArea(
@@ -28,7 +32,7 @@ fun BoardArea(
         // Top
         Row(modifier = Modifier.fillMaxWidth()) {
             // Draw all boxes
-            topGameBoxes.forEach { box -> DrawBox(box) }
+            topGameBoxes.forEach { box -> DrawBox(box, modifier = Modifier.weight(1f)) }
         }
 
         // Middle
@@ -41,7 +45,7 @@ fun BoardArea(
             // Left boxes
             Column {
                 // Draw all boxes
-                leftGameBoxes.forEach { box -> DrawBox(box) }
+                leftGameBoxes.forEach { box -> DrawBox(box, modifier = Modifier.weight(1f)) }
             }
 
             // Middle space for dice
@@ -56,14 +60,14 @@ fun BoardArea(
             // Right boxes
             Column {
                 // Draw all boxes
-                rightGameBoxes.forEach { box -> DrawBox(box) }
+                rightGameBoxes.forEach { box -> DrawBox(box, modifier = Modifier.weight(1f)) }
             }
         }
 
         // Bottom
         Row(modifier = Modifier.fillMaxWidth()) {
             // Draw all boxes
-            bottomGameBoxes.forEach { box -> DrawBox(box) }
+            bottomGameBoxes.forEach { box -> DrawBox(box, modifier = Modifier.weight(1f)) }
         }
     }
 
@@ -71,7 +75,7 @@ fun BoardArea(
 
 
 @Composable
-fun DrawBox(gameBox: GameBox) {
+fun DrawBox(gameBox: GameBox, modifier: Modifier = Modifier) {
     val boxIcon = when (gameBox.type) {
         BoxType.PROPERTY -> R.drawable.icon1
         BoxType.START -> R.drawable.icon7
@@ -81,22 +85,43 @@ fun DrawBox(gameBox: GameBox) {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .border(1.dp, Color.Black),
     ) {
         Image(
             painter = painterResource(id = boxIcon),
             contentDescription = "Box Icon",
             modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.FillBounds
         )
     }
 }
 
-
-@Preview(showBackground = true, widthDp = 100, heightDp = 100)
+/**
+ * For  designing
+ */
+@Preview(showBackground = true, widthDp = 1000, heightDp = 1000)
 @Composable
-fun DrawBoxPreview() {
+fun DrawBoxesPreview() {
+    val topGameBoxes: List<GameBox> = listOf()
+    val leftGameBoxes: List<GameBox> = listOf()
+    val rightGameBoxes: List<GameBox> = listOf()
+    val bottomGameBoxes: List<GameBox> = listOf(
+        Jail(3, "Jail"),
+        Start(
+            0,
+            "S", 200
+        )
+    )
+    val centerContent: @Composable () -> Unit = {}
+
     MonopolyTheme {
-        DrawBox(Start(1, "Start", 200))
+        BoardArea(
+            topGameBoxes = topGameBoxes,
+            leftGameBoxes = leftGameBoxes,
+            rightGameBoxes = rightGameBoxes,
+            bottomGameBoxes = bottomGameBoxes,
+            centerContent = centerContent
+        )
     }
 }
