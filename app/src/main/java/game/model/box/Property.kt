@@ -8,7 +8,7 @@ class Property(
     val price: Int,
     val rent: Int,
     val housePrice: Int
-) : Box(position, name, BoxType.PROPERTY) {
+) : GameBox(position, name, BoxType.PROPERTY) {
 
     var owner: Player? = null
     var numHouses: Int = 0

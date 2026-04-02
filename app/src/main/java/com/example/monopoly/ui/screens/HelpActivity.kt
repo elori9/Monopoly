@@ -1,4 +1,4 @@
-package com.example.monopoly
+package com.example.monopoly.ui.screens
 
 import android.app.SearchManager
 import android.content.Intent
@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.monopoly.R
 import com.example.monopoly.ui.theme.MonopolyTheme
 
 object Constants {

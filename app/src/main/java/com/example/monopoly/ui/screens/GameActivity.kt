@@ -1,4 +1,4 @@
-package com.example.monopoly
+package com.example.monopoly.ui.screens
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.example.monopoly.ui.theme.MonopolyTheme
-import kotlin.concurrent.timer
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

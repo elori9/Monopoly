@@ -2,7 +2,7 @@ package game.model.box
 
 import game.model.Player
 
-abstract class Box(
+abstract class GameBox(
     val position: Int,
     val name: String,
     val type: BoxType

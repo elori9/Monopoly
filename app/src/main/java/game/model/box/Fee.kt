@@ -7,7 +7,7 @@ class Fee
     position: Int,
     name: String,
     val money: Int
-) : Box(position, name, BoxType.FEE) {
+) : GameBox(position, name, BoxType.FEE) {
 
     override fun action(player: Player): String {
         player.pay(money)

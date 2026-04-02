@@ -7,7 +7,7 @@ class Card(
     position: Int,
     name: String,
     val boardSize: Int
-) : Box(position, name, BoxType.CARD) {
+) : GameBox(position, name, BoxType.CARD) {
 
     override fun action(player: Player): String {
         // Pick a random card

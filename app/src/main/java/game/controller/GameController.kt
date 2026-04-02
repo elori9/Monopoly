@@ -155,28 +155,28 @@ class GameController(
         }
     }
 
-    private fun showOptionsPosition(player: Player, box: Box) {
-        when (box) {
+    private fun showOptionsPosition(player: Player, gameBox: GameBox) {
+        when (gameBox) {
             // Switch on different options
             is Property -> {
-                if (box.owner == null) {
+                if (gameBox.owner == null) {
                     // Ask to buy on
-                    view.askToBuyProperty(box, player) { buy ->
+                    view.askToBuyProperty(gameBox, player) { buy ->
                         if (buy) {
                             // Buy it
-                            player.buyProperty(box)
+                            player.buyProperty(gameBox)
 
                             // Update on gui
                             view.updatePlayerMoney(player.id, player.money)
                             view.updatePropertyOwner(player.id, player.position)
-                            view.showMessage("You bought ${box.name}")
+                            view.showMessage("You bought ${gameBox.name}")
                         }
                         // End the turn
                         endTurnAndPass()
                     }
                 } else {
                     // Someone is the owner
-                    box.action(player)
+                    gameBox.action(player)
 
                     // Player can't pay
                     if (player.broke) {
@@ -187,10 +187,10 @@ class GameController(
                     view.updatePlayerMoney(player.id, player.money)
 
                     // If I got deposit show it too
-                    if (box.owner != player) {
+                    if (gameBox.owner != player) {
                         // Use !! bc owner can't be null on this point
-                        view.updatePlayerMoney(box.owner!!.id, box.owner!!.money)
-                        view.showMessage("You got paid for the rent of ${box.name}")
+                        view.updatePlayerMoney(gameBox.owner!!.id, gameBox.owner!!.money)
+                        view.showMessage("You got paid for the rent of ${gameBox.name}")
                     }
 
                     // End the turn
@@ -199,7 +199,7 @@ class GameController(
             }
 
             is Fee -> {
-                box.action(player)
+                gameBox.action(player)
                 view.updatePlayerMoney(player.id, player.money)
                 view.showMessage("You paid a fee")
 
@@ -213,7 +213,7 @@ class GameController(
             }
 
             is Card -> {
-                val result = box.action(player)
+                val result = gameBox.action(player)
                 view.showMessage(result)
 
                 if (result.contains("€")) {
@@ -238,7 +238,7 @@ class GameController(
             }
 
             is Jail -> {
-                box.action(player)
+                gameBox.action(player)
                 view.showMessage("You go to the jail")
 
                 // End the turn
@@ -246,7 +246,7 @@ class GameController(
             }
 
             is Start -> {
-                box.action(player)
+                gameBox.action(player)
                 view.updatePlayerMoney(player.id, player.money)
                 view.showMessage("You got the start money")
 

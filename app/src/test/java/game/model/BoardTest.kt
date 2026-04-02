@@ -19,7 +19,7 @@ class BoardTest {
     fun testGenerateBoard2Players() {
         board.generateBoard(2)
         assertEquals(12, board.size)
-        assertEquals(12, board.boxes.size)
+        assertEquals(12, board.gameBoxes.size)
         
         assertTrue(board.getBox(0) is Start)
         assertTrue(board.getBox(3) is Jail)
@@ -32,7 +32,7 @@ class BoardTest {
     fun testGenerateBoard3Players() {
         board.generateBoard(3)
         assertEquals(20, board.size)
-        assertEquals(20, board.boxes.size)
+        assertEquals(20, board.gameBoxes.size)
         
         assertTrue(board.getBox(0) is Start)
         assertTrue(board.getBox(5) is Jail)
@@ -45,7 +45,7 @@ class BoardTest {
     fun testGenerateBoard4Players() {
         board.generateBoard(4)
         assertEquals(24, board.size)
-        assertEquals(24, board.boxes.size)
+        assertEquals(24, board.gameBoxes.size)
         
         assertTrue(board.getBox(0) is Start)
         assertTrue(board.getBox(6) is Jail)

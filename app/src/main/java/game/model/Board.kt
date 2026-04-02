@@ -3,7 +3,7 @@ package game.model
 import game.model.box.*
 
 class Board {
-    var boxes: List<Box> = listOf()
+    var gameBoxes: List<GameBox> = listOf()
         private set
     var size: Int = 0
         private set
@@ -14,15 +14,15 @@ class Board {
      * @param numPlayers the number of players (2 to 4)
      */
     fun generateBoard(numPlayers: Int) {
-        boxes = when (numPlayers) {
+        gameBoxes = when (numPlayers) {
             2 -> generate2PlayerBoard()
             3 -> generate3PlayerBoard()
             else -> generate4PlayerBoard()
         }
-        size = boxes.size
+        size = gameBoxes.size
     }
 
-    private fun generate2PlayerBoard(): List<Box> {
+    private fun generate2PlayerBoard(): List<GameBox> {
         val s = 12
         return listOf(
             Start(0, "Autobús de Batalla", 200),
@@ -40,7 +40,7 @@ class Board {
         )
     }
 
-    private fun generate3PlayerBoard(): List<Box> {
+    private fun generate3PlayerBoard(): List<GameBox> {
         val s = 20
         return listOf(
             Start(0, "Autobús de Batalla", 200),
@@ -66,7 +66,7 @@ class Board {
         )
     }
 
-    private fun generate4PlayerBoard(): List<Box> {
+    private fun generate4PlayerBoard(): List<GameBox> {
         val s = 24
         return listOf(
             Start(0, "Autobús de Batalla", 200),
@@ -103,7 +103,7 @@ class Board {
      * @param positionIndex the index of the box
      * @return the box at that position
      */
-    fun getBox(positionIndex: Int): Box {
-        return boxes[positionIndex % size]
+    fun getBox(positionIndex: Int): GameBox {
+        return gameBoxes[positionIndex % size]
     }
 }
