@@ -17,6 +17,7 @@ import game.model.box.BoxType
 import game.model.box.Start
 import com.example.monopoly.R
 import game.model.Board
+import game.model.box.BoxName
 import game.model.box.Jail
 
 @Composable
@@ -76,13 +77,7 @@ fun BoardArea(
 
 @Composable
 fun DrawBox(gameBox: GameBox, modifier: Modifier = Modifier) {
-    val boxIcon = when (gameBox.type) {
-        BoxType.PROPERTY -> R.drawable.icon1
-        BoxType.START -> R.drawable.icon7
-        BoxType.JAIL -> R.drawable.icon8
-        BoxType.CARD -> R.drawable.icon9
-        BoxType.FEE -> R.drawable.icon10
-    }
+    val boxIcon = getIconByName(gameBox.name)
 
     Column(
         modifier = modifier
@@ -97,6 +92,27 @@ fun DrawBox(gameBox: GameBox, modifier: Modifier = Modifier) {
     }
 }
 
+private fun getIconByName(name: String): Int {
+    val normalizedName = name.trim().lowercase()
+
+    return when (normalizedName) {
+        BoxName.START.displayName.lowercase()    -> R.drawable.icon7
+        BoxName.LONELY.displayName.lowercase() -> R.drawable.lonely
+        BoxName.TOMATO.displayName.lowercase() -> R.drawable.tomatotown
+        BoxName.JAIL.displayName.lowercase()   -> R.drawable.icon8
+        BoxName.RETAIL.displayName.lowercase() -> R.drawable.retail
+        BoxName.LOOT.displayName.lowercase()   -> R.drawable.lootlake
+        BoxName.LUCK.displayName.lowercase()   -> R.drawable.icon9
+        BoxName.SALTY.displayName.lowercase()  -> R.drawable.salty
+        BoxName.PARK.displayName.lowercase()   -> R.drawable.park
+        BoxName.TAX.displayName.lowercase()    -> R.drawable.icon10
+        BoxName.GREASY.displayName.lowercase() -> R.drawable.greasy
+        BoxName.TILTED.displayName.lowercase() -> R.drawable.tilted
+
+        else -> R.drawable.icon1 // Icono de debug
+    }
+}
+
 /**
  * For  designing
  */
@@ -107,10 +123,10 @@ fun DrawBoxesPreview() {
     val leftGameBoxes: List<GameBox> = listOf()
     val rightGameBoxes: List<GameBox> = listOf()
     val bottomGameBoxes: List<GameBox> = listOf(
-        Jail(3, "Jail"),
+        Jail(3, BoxName.JAIL.displayName),
         Start(
             0,
-            "S", 200
+            BoxName.START.displayName, 200
         )
     )
     val centerContent: @Composable () -> Unit = {}

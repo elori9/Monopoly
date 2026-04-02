@@ -25,18 +25,18 @@ class Board {
     private fun generate2PlayerBoard(): List<GameBox> {
         val s = 12
         return listOf(
-            Start(0, "Autobús de Batalla", 200),
-            Property(1, "Soto Solitario", 60, 2, 50),
-            Property(2, "Pueblo Tomate", 60, 4, 50),
-            Jail(3, "Cárcel"),
-            Property(4, "Ciudad Comercio", 100, 6, 50),
-            Property(5, "Balsa Botín", 100, 6, 50),
-            Card(6, "Suerte", s),
-            Property(7, "Señorío de la Sal", 140, 10, 100),
-            Property(8, "Parque Placentero", 140, 10, 100),
-            Fee(9, "Impuesto", 100),
-            Property(10, "Caserío Colesterol", 180, 14, 100),
-            Property(11, "Pisos Picados", 200, 16, 100)
+            Start(0, BoxName.START.displayName, 200),
+            Property(1, BoxName.LONELY.displayName, 60, 2, 50),
+            Property(2, BoxName.TOMATO.displayName, 60, 4, 50),
+            Jail(3, BoxName.JAIL.displayName),
+            Property(4, BoxName.RETAIL.displayName, 100, 6, 50),
+            Property(5, BoxName.LOOT.displayName, 100, 6, 50),
+            Card(6, BoxName.LUCK.displayName, s),
+            Property(7, BoxName.SALTY.displayName, 140, 10, 100),
+            Property(8, BoxName.PARK.displayName, 140, 10, 100),
+            Fee(9, BoxName.TAX.displayName, 100),
+            Property(10, BoxName.GREASY.displayName, 180, 14, 100),
+            Property(11, BoxName.TILTED.displayName, 200, 16, 100),
         )
     }
 
