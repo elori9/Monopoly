@@ -13,10 +13,9 @@ open class Dice {
      * @return The result of both combined (2-12)
      */
     open fun roll(): Int {
-        val dice1 = Random.nextInt(1, 7)
-        val dice2 = Random.nextInt(1, 7)
+        val dice = Random.nextInt(1, 7)
 
-        numbers = dice1 + dice2
+        numbers = dice
 
         return numbers
     }

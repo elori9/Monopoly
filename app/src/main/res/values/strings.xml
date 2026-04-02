@@ -28,4 +28,5 @@
     <string name="AdditionalInfoTitle">Additional Information</string>
     <string name="AdditionalInfoText">For more information you can visit our project on GitHub</string>
     <string name="Searching">Searching…</string>
+    <string name="roll">Roll dices</string>
 </resources>
