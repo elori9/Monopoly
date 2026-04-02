@@ -29,4 +29,14 @@
     <string name="AdditionalInfoText">For more information you can visit our project on GitHub</string>
     <string name="Searching">Searching…</string>
     <string name="roll">Roll dice</string>
+    <string name="NoProperties">No properties owned</string>
+    <string name="MoneyLabel">Money: %1$d$</string>
+    <string name="BuyPropAction">Buy Prop.</string>
+    <string name="BuyHouseAction">Buy House</string>
+    <string name="NextTurnAction">Next Turn</string>
+    <string name="TimeLabel">Time: %1$s</string>
+    <string name="EndGameTitle">End Game</string>
+    <string name="EndGameMessage">Are you sure you want to end the game and return to the main menu?</string>
+    <string name="YesAction">Yes</string>
+    <string name="NoAction">No</string>
 </resources>
