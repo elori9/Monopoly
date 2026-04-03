@@ -198,12 +198,25 @@ fun ShowPlayerActions(
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
     ) {
         // Money Section
-        Text(
-            text = stringResource(id = R.string.MoneyLabel, currentPlayerMoney),
-            fontSize = 24.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color.Black
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(id = R.string.MoneyLabel, currentPlayerMoney),
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.icon5),
+                contentDescription = "V-Bucks",
+                modifier = Modifier.size(28.dp)
+            )
+        }
 
         // Action Buttons Section
         val buttonModifier = Modifier
