@@ -1,0 +1,104 @@
+package com.example.monopoly.ui.viewmodel
+
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.example.monopoly.R
+import game.interfaces.GameView
+import game.model.Player
+import game.model.TurnAction
+import game.model.box.Property
+
+
+class GameViewModel : GameView {
+    // State vars
+    val playersState = mutableStateListOf<Player>()
+    var currentPlayerMoney by mutableIntStateOf(0)
+    var gameMessage by mutableStateOf("")
+    var dice by mutableStateOf<Int?>(null)
+    var currentPlayer by mutableStateOf<Player?>(null)
+
+    // Those will be the callbacks
+    var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
+    var buyProperty: ((Boolean) -> Unit)? by mutableStateOf(null)
+
+
+    override fun showMessage(message: String) {
+        gameMessage = message
+    }
+
+    override fun showTurnOptions(
+        player: Player,
+        onActionSelected: (TurnAction) -> Unit
+    ) {
+        currentPlayer = player
+        currentPlayerMoney = player.money
+        turnAction = onActionSelected
+    }
+
+    override fun showDiceRoll(playerName: String, roll: Int) {
+        val rollMsg = R.string.Rolling
+        gameMessage = playerName + rollMsg + roll
+        dice = roll
+    }
+
+    override fun updatePlayerPosition(playerId: Int, newPosition: Int) {
+        // Compose will redraw the player, who will be on new position, no use of newPosition, player has it as attribute
+        triggerPlayerRecomposition(playerId)
+    }
+
+    override fun updatePlayerMoney(playerId: Int, money: Int) {
+        // Compose will redraw the player, who will update the money, there save the update
+        currentPlayerMoney = money
+        triggerPlayerRecomposition(playerId)
+    }
+
+    override fun showBankrupt(playerName: String) {
+        val message = R.string.Bankrupt
+        gameMessage = playerName + message
+    }
+
+    override fun askToBuyProperty(
+        property: Property,
+        player: Player,
+        onDecision: (Boolean) -> Unit
+    ) {
+        buyProperty = onDecision
+    }
+
+    override fun askToSelectPropertyToBuild(
+        properties: List<Property>,
+        onSelected: (Property?) -> Unit
+    ) {
+        if (properties.isNotEmpty()) {
+            // Build on first property, no select
+            onSelected(properties.first())
+
+        } else {
+            // No properties to build in
+            onSelected(null)
+        }
+    }
+
+    override fun showGameOver(winner: Player) {
+        val message = R.string.Win
+        gameMessage = winner.name + message
+    }
+
+    override fun updatePropertyOwner(playerId: Int, position: Int) {
+        // No need
+    }
+
+    /**
+     * This functions does nothing, just calls compose to recompose the screen (for updating money and position)
+     */
+    private fun triggerPlayerRecomposition(playerId: Int) {
+        val index = playersState.indexOfFirst { it.id == playerId }
+        if (index != -1) {
+            playersState[index] = playersState[index]
+        }
+    }
+}

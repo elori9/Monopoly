@@ -39,4 +39,7 @@
     <string name="EndGameMessage">Are you sure you want to end the game and return to the main menu?</string>
     <string name="YesAction">Yes</string>
     <string name="NoAction">No</string>
+    <string name="Rolling"> rolled the dices and got a </string>
+    <string name="Bankrupt"> got bankrupt </string>
+    <string name="Win"> wins the game</string>
 </resources>

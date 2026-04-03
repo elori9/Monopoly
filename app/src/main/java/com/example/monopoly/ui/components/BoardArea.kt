@@ -3,6 +3,7 @@ package com.example.monopoly.ui.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,10 +12,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.monopoly.ui.theme.MonopolyTheme
 import game.model.box.GameBox
 import game.model.box.Start
 import com.example.monopoly.R
+import com.example.monopoly.ui.components.animations.RollDice
 import game.model.box.BoxName
 import game.model.box.Fee
 import game.model.box.Jail
@@ -31,6 +34,7 @@ fun BoardArea(
     leftGameBoxes: List<GameBox>,
     rightGameBoxes: List<GameBox>,
     allPlayers: List<Player>,
+    gameMessage: String,
     centerContent: @Composable () -> Unit // Save space for dices in the middle
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -85,7 +89,25 @@ fun BoardArea(
                     .weight(0.5f)
                     .fillMaxHeight()
             ) {
-                centerContent()
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                ) {
+                    // Messages
+                    Text(
+                        text = gameMessage,
+                        fontSize = 18.sp,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+
+                    // Dice
+                    centerContent()
+                }
             }
 
             // Right boxes
@@ -159,14 +181,14 @@ fun DrawBox(
             Row(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .padding(top = 65.dp),
+                    .padding(top = 20.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 repeat(housesCount) {
                     Image(
                         painter = painterResource(id = R.drawable.icon6),
                         contentDescription = "house",
-                        modifier = Modifier.size(55.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }
@@ -186,7 +208,7 @@ fun DrawBox(
                     Image(
                         painter = painterResource(id = tokenImage),
                         contentDescription = "Piece of ${player.name}",
-                        modifier = Modifier.size(60.dp)
+                        modifier = Modifier.size(50.dp)
                     )
                 }
             }
@@ -282,6 +304,7 @@ fun DrawBoxesPreview() {
             rightGameBoxes = rightGameBoxes,
             bottomGameBoxes = bottomGameBoxes,
             allPlayers = allPlayers,
+            gameMessage = "MSG",
             centerContent = centerContent
         )
     }
