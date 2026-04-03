@@ -17,18 +17,37 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 import com.example.monopoly.ui.theme.MonopolyTheme
+import kotlinx.coroutines.delay
 import java.util.Locale
 
+/**
+ * Stateful function: Handles minutes conversion and countdown logic.
+ */
 @Composable
 fun HeaderArea(
-    secondsRemaining: Long,
+    initialMinutes: Int,
     onExitGame: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // State for remaining seconds, initialized from received minutes
+    var secondsRemaining by remember(initialMinutes) {
+        mutableLongStateOf(initialMinutes.toLong() * 60L)
+    }
     var showExitDialog by remember { mutableStateOf(false) }
+
+    // Timer logic: only runs if time limit is > 0
+    if (initialMinutes > 0) {
+        LaunchedEffect(Unit) {
+            while (secondsRemaining > 0) {
+                delay(1000L)
+                secondsRemaining--
+            }
+        }
+    }
 
     HeaderAreaContent(
         secondsRemaining = secondsRemaining,
+        isTimerEnabled = initialMinutes > 0,
         showExitDialog = showExitDialog,
         onMenuClick = { showExitDialog = true },
         onDismissExitDialog = { showExitDialog = false },
@@ -40,9 +59,13 @@ fun HeaderArea(
     )
 }
 
+/**
+ * Stateless function: Purely visual representation.
+ */
 @Composable
 fun HeaderAreaContent(
     secondsRemaining: Long,
+    isTimerEnabled: Boolean,
     showExitDialog: Boolean,
     onMenuClick: () -> Unit,
     onDismissExitDialog: () -> Unit,
@@ -56,11 +79,11 @@ fun HeaderAreaContent(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Space to center the timer
+        // Spacer to keep the timer centered (adjusted to button size)
         Spacer(modifier = Modifier.width(48.dp))
 
-        // Timer Section
-        if (secondsRemaining > 0) {
+        // Timer Section (visible only if initialMinutes > 0)
+        if (isTimerEnabled) {
             Text(
                 text = stringResource(id = R.string.TimeLabel, formatTime(secondsRemaining)),
                 fontSize = 32.sp,
@@ -71,7 +94,7 @@ fun HeaderAreaContent(
             Spacer(modifier = Modifier.weight(1f))
         }
 
-        // Exit Button with Door Icon
+        // Exit Button (Door)
         IconButton(
             onClick = onMenuClick,
             modifier = Modifier
@@ -86,7 +109,7 @@ fun HeaderAreaContent(
         }
     }
 
-    // Exit Confirmation Dialog
+    // Exit confirmation dialog
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = onDismissExitDialog,
@@ -107,7 +130,7 @@ fun HeaderAreaContent(
 }
 
 /**
- * Format seconds into hh:mm:ss
+ * Utility to format seconds to hh:mm:ss
  */
 private fun formatTime(seconds: Long): String {
     val h = seconds / 3600
@@ -116,15 +139,12 @@ private fun formatTime(seconds: Long): String {
     return String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)
 }
 
-/**
- * For designing
- */
 @Preview(showBackground = true, widthDp = 600)
 @Composable
 fun HeaderAreaPreview() {
     MonopolyTheme {
         HeaderArea(
-            secondsRemaining = 3661, // 01:01:01
+            initialMinutes = 15,
             onExitGame = {}
         )
     }
