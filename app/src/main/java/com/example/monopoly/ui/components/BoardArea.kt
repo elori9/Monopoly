@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -18,6 +19,7 @@ import game.model.box.BoxName
 import game.model.box.Fee
 import game.model.box.Jail
 import game.model.box.Property
+import game.model.Player
 
 /**
  * Draw the board
@@ -28,21 +30,26 @@ fun BoardArea(
     bottomGameBoxes: List<GameBox>,
     leftGameBoxes: List<GameBox>,
     rightGameBoxes: List<GameBox>,
+    allPlayers: List<Player>,
     centerContent: @Composable () -> Unit // Save space for dices in the middle
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
 
         // Top
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .weight(0.25f)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.25f)
+        ) {
             // Draw all boxes
             topGameBoxes.forEach { box ->
                 DrawBox(
-                    box,
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight()
+                        .fillMaxHeight(),
+                    gameBox = box,
+                    playersHere = allPlayers.filter { player -> player.position == box.position },
+                    housesCount = if (box is Property) box.numHouses else 0
                 )
             }
         }
@@ -53,7 +60,6 @@ fun BoardArea(
                 .fillMaxWidth()
                 .weight(0.5f)
         ) {
-
             // Left boxes
             Column(
                 modifier = Modifier
@@ -63,10 +69,12 @@ fun BoardArea(
                 // Draw all boxes
                 leftGameBoxes.forEach { box ->
                     DrawBox(
-                        box,
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        gameBox = box,
+                        playersHere = allPlayers.filter { player -> player.position == box.position },
+                        housesCount = if (box is Property) box.numHouses else 0
                     )
                 }
             }
@@ -89,26 +97,32 @@ fun BoardArea(
                 // Draw all boxes
                 rightGameBoxes.forEach { box ->
                     DrawBox(
-                        box,
                         modifier = Modifier
                             .weight(1f)
-                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        gameBox = box,
+                        playersHere = allPlayers.filter { player -> player.position == box.position },
+                        housesCount = if (box is Property) box.numHouses else 0
                     )
                 }
             }
         }
 
         // Bottom
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .weight(0.25f)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.25f)
+        ) {
             // Draw all boxes
             bottomGameBoxes.forEach { box ->
                 DrawBox(
-                    box,
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight()
+                        .fillMaxHeight(),
+                    gameBox = box,
+                    playersHere = allPlayers.filter { player -> player.position == box.position },
+                    housesCount = if (box is Property) box.numHouses else 0
                 )
             }
         }
@@ -120,21 +134,79 @@ fun BoardArea(
  * Draw the box
  */
 @Composable
-fun DrawBox(gameBox: GameBox, modifier: Modifier = Modifier) {
+fun DrawBox(
+    modifier: Modifier = Modifier,
+    gameBox: GameBox,
+    playersHere: List<Player> = emptyList(),
+    housesCount: Int = 0,
+) {
     val boxIcon = getIconByName(gameBox.name)
 
-    Column(
-        modifier = modifier
-            .border(1.dp, Color.Black),
+    // Use of box to use a cape container
+    Box(
+        modifier = modifier.border(1.dp, Color.Black)
     ) {
+        //Background
         Image(
             painter = painterResource(id = boxIcon),
             contentDescription = "Box Icon",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.FillBounds
         )
+
+        // Houses (on top)
+        if (housesCount > 0) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 65.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                repeat(housesCount) {
+                    Image(
+                        painter = painterResource(id = R.drawable.icon6),
+                        contentDescription = "house",
+                        modifier = Modifier.size(55.dp)
+                    )
+                }
+            }
+        }
+
+        // Players icons (on bottom)
+        if (playersHere.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                playersHere.forEach { player ->
+                    val tokenImage = getTokenByPlayerId(player.id)
+
+                    Image(
+                        painter = painterResource(id = tokenImage),
+                        contentDescription = "Piece of ${player.name}",
+                        modifier = Modifier.size(60.dp)
+                    )
+                }
+            }
+        }
     }
 }
+
+/**
+ * Parse the player to an icon
+ */
+private fun getTokenByPlayerId(playerId: Int): Int {
+    return when (playerId) {
+        0 -> R.drawable.icon1
+        1 -> R.drawable.icon2
+        2 -> R.drawable.icon3
+        3 -> R.drawable.icon4
+        else -> R.drawable.icon1 // Shouldn't happen
+    }
+}
+
 
 /**
  * Parse the icon by name
@@ -178,7 +250,7 @@ fun DrawBoxesPreview() {
     )
     val rightGameBoxes: List<GameBox> = listOf(
         Property(10, BoxName.GREASY.displayName, 60, 2, 50),
-        Property(11, BoxName.TILTED.displayName, 60, 4, 50),
+        Property(11, BoxName.TILTED.displayName, 60, 4, 50).apply { numHouses = 4 },
     )
     val bottomGameBoxes: List<GameBox> = listOf(
         Jail(3, BoxName.JAIL.displayName),
@@ -191,12 +263,25 @@ fun DrawBoxesPreview() {
     )
     val centerContent: @Composable () -> Unit = {}
 
+    val allPlayers: List<Player> = listOf(
+        // 2 players on same box
+        Player(id = 0, name = "P1", money = 2000).apply { setPosition(0) },
+        Player(id = 1, name = "P2", money = 2000).apply { setPosition(0) },
+
+        // P3 on jail
+        Player(id = 2, name = "P3", money = 2000).apply { setPosition(3) },
+
+        // P4 on a property with 4 houses
+        Player(id = 3, name = "P4", money = 2000).apply { setPosition(11) }
+    )
+
     MonopolyTheme {
         BoardArea(
             topGameBoxes = topGameBoxes,
             leftGameBoxes = leftGameBoxes,
             rightGameBoxes = rightGameBoxes,
             bottomGameBoxes = bottomGameBoxes,
+            allPlayers = allPlayers,
             centerContent = centerContent
         )
     }

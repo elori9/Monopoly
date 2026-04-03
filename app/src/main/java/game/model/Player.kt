@@ -115,4 +115,7 @@ class Player(
     fun setBroke(bool: Boolean) {
         broke = bool
     }
+    fun setPosition(pos: Int) {
+        position = pos
+    }
 }

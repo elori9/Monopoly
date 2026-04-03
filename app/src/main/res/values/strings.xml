@@ -30,7 +30,7 @@
     <string name="Searching">Searching…</string>
     <string name="roll">Roll dice</string>
     <string name="NoProperties">No properties owned</string>
-    <string name="MoneyLabel">Money: %1$d$</string>
+    <string name="MoneyLabel">Money: %1$d</string>
     <string name="BuyPropAction">Buy Prop.</string>
     <string name="BuyHouseAction">Buy House</string>
     <string name="NextTurnAction">Next Turn</string>
