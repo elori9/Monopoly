@@ -40,8 +40,7 @@ class GameViewModel : GameView {
     }
 
     override fun showDiceRoll(playerName: String, roll: Int) {
-        val rollMsg = R.string.Rolling
-        gameMessage = playerName + rollMsg + roll
+        gameMessage = "$playerName roll $roll"
         dice = roll
     }
 
@@ -57,8 +56,7 @@ class GameViewModel : GameView {
     }
 
     override fun showBankrupt(playerName: String) {
-        val message = R.string.Bankrupt
-        gameMessage = playerName + message
+        gameMessage = "$playerName bankrupt"
     }
 
     override fun askToBuyProperty(
@@ -84,8 +82,7 @@ class GameViewModel : GameView {
     }
 
     override fun showGameOver(winner: Player) {
-        val message = R.string.Win
-        gameMessage = winner.name + message
+        gameMessage = "${winner.name} winn"
     }
 
     override fun updatePropertyOwner(playerId: Int, position: Int) {

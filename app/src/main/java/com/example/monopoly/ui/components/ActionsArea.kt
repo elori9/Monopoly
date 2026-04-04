@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 import com.example.monopoly.ui.theme.MonopolyTheme
+import kotlinx.coroutines.delay
 
 /**
  * Stateful function
@@ -228,6 +229,29 @@ fun ShowPlayerActions(
     canNextTurn: Boolean,
     modifier: Modifier = Modifier
 ) {
+    // 'Animation' on money change
+    var textColor by remember { mutableStateOf(Color.Black) }
+    var previousMoney by remember { mutableIntStateOf(currentPlayerMoney) }
+
+    // When the player money change, launch the color changer
+    LaunchedEffect(currentPlayerMoney) {
+        // Change the color depending on winning or losing
+        if (currentPlayerMoney > previousMoney) {
+            textColor = Color.Green
+        } else if (currentPlayerMoney < previousMoney) {
+            textColor = Color.Red
+        }
+
+        // Update the money checker
+        previousMoney = currentPlayerMoney
+
+        // Wait
+        delay(500L)
+
+        // Return same color
+        textColor = Color.Black
+    }
+
     Column(
         modifier = modifier.fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -242,7 +266,7 @@ fun ShowPlayerActions(
                 text = stringResource(id = R.string.MoneyLabel, currentPlayerMoney),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
+                color = textColor
             )
 
             Spacer(modifier = Modifier.width(8.dp))
