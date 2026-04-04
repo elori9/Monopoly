@@ -35,7 +35,7 @@ import com.example.monopoly.ui.theme.MonopolyTheme
  * Stateful function
  */
 @Composable
-fun ActionsArea(
+fun ActionsAreaPortrait(
     currentPlayerMoney: Int,
     ownedPropertyIcons: List<Int>,
     onBuyProperty: () -> Unit,
@@ -50,7 +50,7 @@ fun ActionsArea(
     var expandedImageRes by remember { mutableStateOf<Int?>(null) }
 
     Box(modifier = modifier.fillMaxWidth()) {
-        ActionsAreaContent(
+        ActionsAreaContentPortrait(
             currentPlayerMoney = currentPlayerMoney,
             ownedPropertyIcons = ownedPropertyIcons,
             scrollState = scrollState,
@@ -64,25 +64,36 @@ fun ActionsArea(
         )
 
         // Overlay for enlarged image
-        AnimatedVisibility(
-            visible = expandedImageRes != null,
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut()
-        ) {
-            expandedImageRes?.let { resId ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.8f))
-                        .clickable { expandedImageRes = null },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = painterResource(id = resId),
-                        contentDescription = null,
-                        modifier = Modifier.size(300.dp) // Big size at the center
-                    )
-                }
+        OverlayForImage(expandedImageRes = expandedImageRes, onClose = { expandedImageRes = null })
+    }
+}
+
+/**
+ * Draws an overlay for image
+ */
+@Composable
+fun OverlayForImage(
+    expandedImageRes: Int?,
+    onClose: () -> Unit
+) {
+    AnimatedVisibility(
+        visible = expandedImageRes != null,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut()
+    ) {
+        expandedImageRes?.let { resId ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.8f))
+                    .clickable { onClose },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = resId),
+                    contentDescription = null,
+                    modifier = Modifier.size(300.dp) // Big size at the center
+                )
             }
         }
     }
@@ -92,7 +103,7 @@ fun ActionsArea(
  * Stateless function
  */
 @Composable
-fun ActionsAreaContent(
+fun ActionsAreaContentPortrait(
     currentPlayerMoney: Int,
     ownedPropertyIcons: List<Int>,
     scrollState: ScrollState,
@@ -179,6 +190,31 @@ fun ShowOwnedProperties(
 }
 
 /**
+ * Stateful function for draw properties
+ */
+@Composable
+fun SmartPropertiesArea(
+    ownedPropertyIcons: List<Int>,
+    modifier: Modifier = Modifier
+) {
+    val scrollState = rememberScrollState()
+    var expandedImageRes by remember { mutableStateOf<Int?>(null) }
+
+    Box(modifier = modifier) {
+        // Draw properties
+        ShowOwnedProperties(
+            ownedPropertyIcons = ownedPropertyIcons,
+            scrollState = scrollState,
+            onCardClick = { resId -> expandedImageRes = resId },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Overlay
+        OverlayForImage(expandedImageRes = expandedImageRes, onClose = { expandedImageRes = null })
+    }
+}
+
+/**
  * Show the player money and action buttons
  */
 @Composable
@@ -204,7 +240,7 @@ fun ShowPlayerActions(
         ) {
             Text(
                 text = stringResource(id = R.string.MoneyLabel, currentPlayerMoney),
-                fontSize = 24.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.Black
             )
@@ -221,7 +257,7 @@ fun ShowPlayerActions(
         // Action Buttons Section
         val buttonModifier = Modifier
             .fillMaxWidth()
-            .height(55.dp)
+            .height(35.dp)
 
         ActionButton(
             text = stringResource(id = R.string.BuyPropAction),
@@ -255,7 +291,7 @@ fun ShowPlayerActions(
             ) {
                 Text(
                     text = stringResource(id = R.string.NextTurnAction),
-                    fontSize = 16.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White
                 )
@@ -271,6 +307,7 @@ fun ShowPlayerActions(
     }
 }
 
+
 /**
  * Draw an action button
  */
@@ -285,16 +322,17 @@ fun ActionButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(15.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF03A9F4),
             disabledContainerColor = Color.LightGray
         ),
+        contentPadding = PaddingValues(vertical = 4.dp, horizontal = 16.dp),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
     ) {
         Text(
             text = text,
-            fontSize = 16.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.ExtraBold,
             color = Color.White
         )
@@ -303,9 +341,9 @@ fun ActionButton(
 
 @Preview(showBackground = true, widthDp = 800)
 @Composable
-fun ActionsAreaPreview() {
+fun ActionsAreaPortraitPreview() {
     MonopolyTheme {
-        ActionsArea(
+        ActionsAreaPortrait(
             currentPlayerMoney = 500,
             ownedPropertyIcons = listOf(R.drawable.icon15, R.drawable.icon17, R.drawable.icon14),
             onBuyProperty = {},

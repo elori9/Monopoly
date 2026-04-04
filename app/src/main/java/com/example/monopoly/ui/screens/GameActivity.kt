@@ -1,6 +1,7 @@
 package com.example.monopoly.ui.screens
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,15 +9,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 
-import com.example.monopoly.ui.components.ActionsArea
+import com.example.monopoly.ui.components.ActionsAreaPortrait
 import com.example.monopoly.ui.components.BoardArea
-import com.example.monopoly.ui.components.HeaderArea
+import com.example.monopoly.ui.components.GameTimer
+import com.example.monopoly.ui.components.HeaderAreaPortrait
+import com.example.monopoly.ui.components.ShowPlayerActions
+import com.example.monopoly.ui.components.SmartHeaderButtons
+import com.example.monopoly.ui.components.SmartPropertiesArea
 import com.example.monopoly.ui.components.animations.RollDice
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.GameViewModel
@@ -27,7 +34,7 @@ import game.model.Player
 import game.model.TurnAction
 import game.model.box.BoxName
 import game.model.box.GameBox
-import kotlinx.coroutines.channels.ticker
+import kotlinx.coroutines.delay
 import kotlin.collections.emptyList
 
 class GameActivity : ComponentActivity() {
@@ -79,7 +86,6 @@ fun GameScreen(
 
     val viewModel = remember { GameViewModel() }
 
-
     val controller = remember {
         // Get the players
         val players =
@@ -108,15 +114,35 @@ fun GameScreen(
     val rightBoxes = board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size)
 
     // Owned houses
-    val currentOwnedIcons = remember(viewModel.currentPlayer, viewModel.currentPlayer?.properties?.size) {
-        // Recalculate the other player cards or the new properties for the same player
-        viewModel.currentPlayer?.properties?.map { property ->
-            getCardIconByName(property.name)
-        } ?: emptyList()
+    val currentOwnedIcons =
+        remember(viewModel.currentPlayer, viewModel.currentPlayer?.properties?.size) {
+            // Recalculate the other player cards or the new properties for the same player
+            viewModel.currentPlayer?.properties?.map { property ->
+                getCardIconByName(property.name)
+            } ?: emptyList()
+        }
+
+    // Timer
+    var secondsRemaining by rememberSaveable(initialMinutes) {
+        mutableLongStateOf(initialMinutes.toLong() * 60L)
     }
 
+    if (initialMinutes > 0) {
+        LaunchedEffect(Unit) {
+            while (secondsRemaining > 0) {
+                delay(1000L)
+                secondsRemaining--
+            }
+        }
+    }
+
+    // Orientation
+    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+
     GameContent(
+        isPortrait = isPortrait,
         initialMinutes = initialMinutes,
+        secondsRemaining = secondsRemaining,
         onExit = onExit,
         topGameBoxes = topBoxes,
         bottomGameBoxes = bottomBoxes,
@@ -187,7 +213,82 @@ fun getCardIconByName(name: String): Int {
  */
 @Composable
 fun GameContent(
+    isPortrait: Boolean,
     initialMinutes: Int,
+    secondsRemaining: Long,
+    onExit: () -> Unit,
+    topGameBoxes: List<GameBox>,
+    bottomGameBoxes: List<GameBox>,
+    leftGameBoxes: List<GameBox>,
+    rightGameBoxes: List<GameBox>,
+    allPlayers: List<Player>,
+    currentPlayerMoney: Int,
+    ownedPropertyIcons: List<Int>,
+    onBuyProperty: () -> Unit,
+    onBuyHouse: () -> Unit,
+    onNextTurn: () -> Unit,
+    gameMessage: String,
+    canBuyProperty: Boolean,
+    canBuyHouse: Boolean,
+    canNextTurn: Boolean,
+    currentDiceRoll: Int?,
+    modifier: Modifier = Modifier
+) {
+    // Draw depending on orientation
+    if (
+        isPortrait
+    ) {
+        DrawPortrait(
+            initialMinutes = initialMinutes,
+            secondsRemaining = secondsRemaining,
+            onExit = onExit,
+            topGameBoxes = topGameBoxes,
+            bottomGameBoxes = bottomGameBoxes,
+            leftGameBoxes = leftGameBoxes,
+            rightGameBoxes = rightGameBoxes,
+            allPlayers = allPlayers,
+            currentPlayerMoney = currentPlayerMoney,
+            ownedPropertyIcons = ownedPropertyIcons,
+            gameMessage = gameMessage,
+            onBuyProperty = onBuyProperty,
+            onBuyHouse = onBuyHouse,
+            onNextTurn = onNextTurn,
+            canBuyProperty = canBuyProperty,
+            canBuyHouse = canBuyHouse,
+            canNextTurn = canNextTurn,
+            currentDiceRoll = currentDiceRoll,
+            modifier = modifier
+        )
+    } else {
+        DrawLandscape(
+            initialMinutes = initialMinutes,
+            secondsRemaining = secondsRemaining,
+            onExit = onExit,
+            topGameBoxes = topGameBoxes,
+            bottomGameBoxes = bottomGameBoxes,
+            leftGameBoxes = leftGameBoxes,
+            rightGameBoxes = rightGameBoxes,
+            allPlayers = allPlayers,
+            currentPlayerMoney = currentPlayerMoney,
+            ownedPropertyIcons = ownedPropertyIcons,
+            gameMessage = gameMessage,
+            onBuyProperty = onBuyProperty,
+            onBuyHouse = onBuyHouse,
+            onNextTurn = onNextTurn,
+            canBuyProperty = canBuyProperty,
+            canBuyHouse = canBuyHouse,
+            canNextTurn = canNextTurn,
+            currentDiceRoll = currentDiceRoll,
+            modifier = modifier
+        )
+    }
+
+}
+
+@Composable
+fun DrawPortrait(
+    initialMinutes: Int,
+    secondsRemaining: Long,
     onExit: () -> Unit,
     topGameBoxes: List<GameBox>,
     bottomGameBoxes: List<GameBox>,
@@ -208,8 +309,9 @@ fun GameContent(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         // Top Section: Timer and Exit
-        HeaderArea(
-            initialMinutes = initialMinutes,
+        HeaderAreaPortrait(
+            secondsRemaining = secondsRemaining,
+            isTimerEnabled = initialMinutes > 0, // the timer will be on if there is time
             onExitGame = onExit
         )
 
@@ -239,7 +341,7 @@ fun GameContent(
         }
 
         // Bottom Section: Player stats and Actions
-        ActionsArea(
+        ActionsAreaPortrait(
             currentPlayerMoney = currentPlayerMoney,
             ownedPropertyIcons = ownedPropertyIcons,
             onBuyProperty = onBuyProperty,
@@ -252,9 +354,133 @@ fun GameContent(
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, heightDp = 800)
 @Composable
-fun GameScreenPreview() {
+fun DrawLandscape(
+    initialMinutes: Int,
+    secondsRemaining: Long,
+    onExit: () -> Unit,
+    topGameBoxes: List<GameBox>,
+    bottomGameBoxes: List<GameBox>,
+    leftGameBoxes: List<GameBox>,
+    rightGameBoxes: List<GameBox>,
+    allPlayers: List<Player>,
+    currentPlayerMoney: Int,
+    ownedPropertyIcons: List<Int>,
+    onBuyProperty: () -> Unit,
+    onBuyHouse: () -> Unit,
+    onNextTurn: () -> Unit,
+    gameMessage: String,
+    canBuyProperty: Boolean,
+    canBuyHouse: Boolean,
+    canNextTurn: Boolean,
+    currentDiceRoll: Int?,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Left
+        Column(
+            modifier = Modifier
+                .weight(0.15f)
+                .padding(end = 10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            SmartPropertiesArea(
+                ownedPropertyIcons = ownedPropertyIcons,
+            )
+        }
+
+        // Mid
+        Box(
+            modifier = Modifier
+                .weight(0.55f)
+                .fillMaxHeight()
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            BoardArea(
+                topGameBoxes = topGameBoxes,
+                bottomGameBoxes = bottomGameBoxes,
+                leftGameBoxes = leftGameBoxes,
+                rightGameBoxes = rightGameBoxes,
+                allPlayers = allPlayers,
+                gameMessage = gameMessage,
+                centerContent = {
+                    // Dice
+                    if (currentDiceRoll != null) {
+                        RollDice(
+                            result = currentDiceRoll,
+                            onRollClick = { onNextTurn() }
+                        )
+                    }
+                }
+            )
+        }
+
+        // Right
+        Column(
+            modifier = Modifier
+                .weight(0.3f)
+                .fillMaxHeight()
+                .padding(start = 6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // Header icons
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.1f),
+                horizontalArrangement = Arrangement.End
+            ) {
+                SmartHeaderButtons(onExitGame = onExit)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Timer
+            Row(
+                modifier = modifier
+                    .fillMaxSize()
+                    .weight(0.25f)
+                    .fillMaxHeight(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GameTimer(secondsRemaining = secondsRemaining, isTimerEnabled = initialMinutes > 0)
+            }
+
+            // Action area
+            Row(
+                modifier = modifier
+                    .fillMaxSize()
+                    .weight(0.75f)
+                    .fillMaxHeight()
+                    .padding(start = 16.dp),
+            ) {
+                ShowPlayerActions(
+                    currentPlayerMoney = currentPlayerMoney,
+                    onBuyProperty = onBuyProperty,
+                    onBuyHouse = onBuyHouse,
+                    onNextTurn = onNextTurn,
+                    canBuyProperty = canBuyProperty,
+                    canBuyHouse = canBuyHouse,
+                    canNextTurn = canNextTurn,
+                    modifier = Modifier
+                )
+            }
+        }
+    }
+
+}
+
+@Preview(showBackground = true, widthDp = 600, heightDp = 250)
+@Composable
+fun GameScreenLandscapePreview() {
     MonopolyTheme {
         GameScreen(
             numPlayers = 2,

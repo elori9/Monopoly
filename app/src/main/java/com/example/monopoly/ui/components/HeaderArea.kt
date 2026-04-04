@@ -1,6 +1,7 @@
 package com.example.monopoly.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -17,59 +18,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 import com.example.monopoly.ui.theme.MonopolyTheme
-import kotlinx.coroutines.delay
 import java.util.Locale
 
-/**
- * Stateful function: Handles minutes conversion and countdown logic.
- */
-@Composable
-fun HeaderArea(
-    initialMinutes: Int,
-    onExitGame: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    // State for remaining seconds, initialized from received minutes
-    var secondsRemaining by remember(initialMinutes) {
-        mutableLongStateOf(initialMinutes.toLong() * 60L)
-    }
-    var showExitDialog by remember { mutableStateOf(false) }
-
-    // Timer logic: only runs if time limit is > 0
-    if (initialMinutes > 0) {
-        LaunchedEffect(Unit) {
-            while (secondsRemaining > 0) {
-                delay(1000L)
-                secondsRemaining--
-            }
-        }
-    }
-
-    HeaderAreaContent(
-        secondsRemaining = secondsRemaining,
-        isTimerEnabled = initialMinutes > 0,
-        showExitDialog = showExitDialog,
-        onMenuClick = { showExitDialog = true },
-        onDismissExitDialog = { showExitDialog = false },
-        onConfirmExitGame = {
-            showExitDialog = false
-            onExitGame()
-        },
-        modifier = modifier
-    )
-}
 
 /**
  * Stateless function: Purely visual representation.
  */
 @Composable
-fun HeaderAreaContent(
+fun HeaderAreaPortrait(
     secondsRemaining: Long,
     isTimerEnabled: Boolean,
-    showExitDialog: Boolean,
-    onMenuClick: () -> Unit,
-    onDismissExitDialog: () -> Unit,
-    onConfirmExitGame: () -> Unit,
+    onExitGame: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -82,31 +41,64 @@ fun HeaderAreaContent(
         // Spacer to keep the timer centered (adjusted to button size)
         Spacer(modifier = Modifier.width(48.dp))
 
-        // Timer Section (visible only if initialMinutes > 0)
-        if (isTimerEnabled) {
-            Text(
-                text = stringResource(id = R.string.TimeLabel, formatTime(secondsRemaining)),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.Black
-            )
-        } else {
-            Spacer(modifier = Modifier.weight(1f))
-        }
+        // Timer
+        GameTimer(
+            secondsRemaining = secondsRemaining,
+            isTimerEnabled = isTimerEnabled
+        )
+        // Buttons
+        SmartHeaderButtons(
+            onExitGame = onExitGame
+        )
+    }
+}
 
-        // Exit Button (Door)
-        IconButton(
-            onClick = onMenuClick,
-            modifier = Modifier
-                .size(48.dp)
-                .background(Color.Gray, shape = RoundedCornerShape(8.dp))
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                contentDescription = stringResource(id = R.string.Exit),
-                tint = Color.White
-            )
-        }
+/**
+ * Stateless function: draws te timer
+ */
+@Composable
+fun GameTimer(
+    secondsRemaining: Long,
+    isTimerEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    if (isTimerEnabled) {
+        Text(
+            text = stringResource(id = R.string.TimeLabel, formatTime(secondsRemaining)),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color.Black,
+            modifier = modifier
+        )
+    } else {
+        Spacer(modifier = modifier)
+    }
+}
+
+/**
+ * Stateless Icons: exit button, reutilizable for put more easily
+ */
+@Composable
+fun HeaderButtons(
+    showExitDialog: Boolean,
+    onMenuClick: () -> Unit,
+    onDismissExitDialog: () -> Unit,
+    onConfirmExitGame: () -> Unit,
+) {
+    // Exit Button (Door)
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .background(Color.Gray, shape = RoundedCornerShape(8.dp))
+            .clickable { onMenuClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+            contentDescription = stringResource(id = R.string.Exit),
+            tint = Color.White,
+            modifier = Modifier.size(15.dp)
+        )
     }
 
     // Exit confirmation dialog
@@ -130,6 +122,28 @@ fun HeaderAreaContent(
 }
 
 /**
+ * Stateful Header Buttons
+ */
+@Composable
+fun SmartHeaderButtons(
+    onExitGame: () -> Unit,
+) {
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // Call stateless function
+    HeaderButtons(
+        showExitDialog = showExitDialog,
+        onMenuClick = { showExitDialog = true },
+        onDismissExitDialog = { showExitDialog = false },
+        onConfirmExitGame = {
+            showExitDialog = false
+            onExitGame()
+        }
+    )
+}
+
+
+/**
  * Utility to format seconds to hh:mm:ss
  */
 private fun formatTime(seconds: Long): String {
@@ -139,12 +153,14 @@ private fun formatTime(seconds: Long): String {
     return String.format(Locale.getDefault(), "%02d:%02d:%02d", h, m, s)
 }
 
+
 @Preview(showBackground = true, widthDp = 600)
 @Composable
-fun HeaderAreaPreview() {
+fun HeaderAreaPortraitPreview() {
     MonopolyTheme {
-        HeaderArea(
-            initialMinutes = 15,
+        HeaderAreaPortrait(
+            secondsRemaining = 900L,
+            isTimerEnabled = true,
             onExitGame = {}
         )
     }
