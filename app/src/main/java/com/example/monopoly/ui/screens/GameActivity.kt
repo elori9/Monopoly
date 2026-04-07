@@ -16,14 +16,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.monopoly.R
-
-import com.example.monopoly.ui.components.ActionsAreaPortrait
-import com.example.monopoly.ui.components.BoardArea
-import com.example.monopoly.ui.components.GameTimer
-import com.example.monopoly.ui.components.HeaderAreaPortrait
-import com.example.monopoly.ui.components.ShowPlayerActions
-import com.example.monopoly.ui.components.SmartHeaderButtons
-import com.example.monopoly.ui.components.SmartPropertiesArea
+import com.example.monopoly.ui.components.*
 import com.example.monopoly.ui.components.animations.RollDice
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.GameViewModel
@@ -35,7 +28,6 @@ import game.model.TurnAction
 import game.model.box.BoxName
 import game.model.box.GameBox
 import kotlinx.coroutines.delay
-import kotlin.collections.emptyList
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +60,7 @@ class GameActivity : ComponentActivity() {
 }
 
 /**
+ * Stateful version of the Game Screen.
  * Manages the game state, board model and logic.
  */
 @Composable
@@ -78,19 +71,17 @@ fun GameScreen(
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Manage Model State
-
-    val board = remember {
+    // 1. Manage Model State
+    val board = remember(numPlayers) {
         Board().apply { generateBoard(numPlayers) }
     }
 
     val viewModel = remember { GameViewModel() }
 
-    val controller = remember {
-        // Get the players
-        val players =
-            playerNames.mapIndexed { index, name -> Player(id = index, name = name, money = 2000) }
-
+    val controller = remember(board) {
+        val players = playerNames.mapIndexed { index, name -> 
+            Player(id = index, name = name, money = 2000) 
+        }
         viewModel.playersState.addAll(players)
 
         GameController(
@@ -106,23 +97,20 @@ fun GameScreen(
         controller.startGame()
     }
 
-    // Prepare data for components (Splitting board boxes)
+    // 2. Prepare data for components (Splitting board boxes)
     val boxesPerSide = board.size / 4
     val bottomBoxes = board.gameBoxes.subList(0, boxesPerSide + 1).reversed()
     val leftBoxes = board.gameBoxes.subList(boxesPerSide + 1, (boxesPerSide * 2))
     val topBoxes = board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1)
     val rightBoxes = board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size)
 
-    // Owned houses
-    val currentOwnedIcons =
-        remember(viewModel.currentPlayer, viewModel.currentPlayer?.properties?.size) {
-            // Recalculate the other player cards or the new properties for the same player
-            viewModel.currentPlayer?.properties?.map { property ->
-                getCardIconByName(property.name)
-            } ?: emptyList()
-        }
+    val currentOwnedIcons = remember(viewModel.currentPlayer, viewModel.currentPlayer?.properties?.size) {
+        viewModel.currentPlayer?.properties?.map { property ->
+            getCardIconByName(property.name)
+        } ?: emptyList()
+    }
 
-    // Timer
+    // 3. Manage UI State (Timer)
     var secondsRemaining by rememberSaveable(initialMinutes) {
         mutableLongStateOf(initialMinutes.toLong() * 60L)
     }
@@ -136,9 +124,9 @@ fun GameScreen(
         }
     }
 
-    // Orientation
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
+    // 4. Delegate to Stateless Content
     GameContent(
         isPortrait = isPortrait,
         initialMinutes = initialMinutes,
@@ -149,39 +137,32 @@ fun GameScreen(
         leftGameBoxes = leftBoxes,
         rightGameBoxes = rightBoxes,
         allPlayers = viewModel.playersState,
+        currentPlayerName = viewModel.currentPlayer?.name ?: "",
+        currentPlayerId = viewModel.currentPlayer?.id ?: 0,
         currentPlayerMoney = viewModel.currentPlayerMoney,
         ownedPropertyIcons = currentOwnedIcons,
         gameMessage = viewModel.gameMessage,
         onBuyProperty = {
-            // Save action
             val action = viewModel.buyProperty
-            // Clean before use
             viewModel.buyProperty = null
-            // Execute
             action?.invoke(true)
         },
         onBuyHouse = {
-            // Save action
             val action = viewModel.turnAction
-            // Clean before use
             viewModel.turnAction = null
-            // Execute
             action?.invoke(TurnAction.BUILD_HOUSE)
         },
         onNextTurn = {
             if (viewModel.buyProperty != null) {
-                // Don't buy
                 val action = viewModel.buyProperty
                 viewModel.buyProperty = null
                 action?.invoke(false)
             } else {
-                // roll
                 val action = viewModel.turnAction
                 viewModel.turnAction = null
                 action?.invoke(TurnAction.ROLL_DICE)
             }
         },
-        // If there is smt null means you can't do the option so ->
         canBuyProperty = viewModel.buyProperty != null,
         canBuyHouse = viewModel.turnAction != null,
         canNextTurn = viewModel.turnAction != null || viewModel.buyProperty != null,
@@ -191,7 +172,7 @@ fun GameScreen(
 }
 
 /**
- * Parse the icon name to a house list
+ * Parse the icon name to a house resource ID
  */
 fun getCardIconByName(name: String): Int {
     return when (name) {
@@ -203,13 +184,13 @@ fun getCardIconByName(name: String): Int {
         BoxName.PARK.displayName -> R.drawable.park
         BoxName.GREASY.displayName -> R.drawable.greasy
         BoxName.TILTED.displayName -> R.drawable.tilted
-
-        else -> R.drawable.icon1 // Shouldn't happen
+        else -> R.drawable.icon1 
     }
 }
 
 /**
- * Only responsible for layout and displaying data.
+ * Stateless version of the Game Screen.
+ * Handles layout and dispatches actions based on orientation.
  */
 @Composable
 fun GameContent(
@@ -222,6 +203,8 @@ fun GameContent(
     leftGameBoxes: List<GameBox>,
     rightGameBoxes: List<GameBox>,
     allPlayers: List<Player>,
+    currentPlayerName: String,
+    currentPlayerId: Int,
     currentPlayerMoney: Int,
     ownedPropertyIcons: List<Int>,
     onBuyProperty: () -> Unit,
@@ -234,10 +217,7 @@ fun GameContent(
     currentDiceRoll: Int?,
     modifier: Modifier = Modifier
 ) {
-    // Draw depending on orientation
-    if (
-        isPortrait
-    ) {
+    if (isPortrait) {
         DrawPortrait(
             initialMinutes = initialMinutes,
             secondsRemaining = secondsRemaining,
@@ -247,6 +227,8 @@ fun GameContent(
             leftGameBoxes = leftGameBoxes,
             rightGameBoxes = rightGameBoxes,
             allPlayers = allPlayers,
+            currentPlayerName = currentPlayerName,
+            currentPlayerId = currentPlayerId,
             currentPlayerMoney = currentPlayerMoney,
             ownedPropertyIcons = ownedPropertyIcons,
             gameMessage = gameMessage,
@@ -269,6 +251,8 @@ fun GameContent(
             leftGameBoxes = leftGameBoxes,
             rightGameBoxes = rightGameBoxes,
             allPlayers = allPlayers,
+            currentPlayerName = currentPlayerName,
+            currentPlayerId = currentPlayerId,
             currentPlayerMoney = currentPlayerMoney,
             ownedPropertyIcons = ownedPropertyIcons,
             gameMessage = gameMessage,
@@ -282,7 +266,6 @@ fun GameContent(
             modifier = modifier
         )
     }
-
 }
 
 @Composable
@@ -295,6 +278,8 @@ fun DrawPortrait(
     leftGameBoxes: List<GameBox>,
     rightGameBoxes: List<GameBox>,
     allPlayers: List<Player>,
+    currentPlayerName: String,
+    currentPlayerId: Int,
     currentPlayerMoney: Int,
     ownedPropertyIcons: List<Int>,
     onBuyProperty: () -> Unit,
@@ -308,19 +293,17 @@ fun DrawPortrait(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        // Top Section: Timer and Exit
+        // Top Section: Timer, Turn Info and Exit
         HeaderAreaPortrait(
             secondsRemaining = secondsRemaining,
-            isTimerEnabled = initialMinutes > 0, // the timer will be on if there is time
+            isTimerEnabled = initialMinutes > 0,
+            currentPlayerName = currentPlayerName,
+            currentPlayerId = currentPlayerId,
             onExitGame = onExit
         )
 
         // Middle Section: The Board
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .padding(8.dp)
-        ) {
+        Box(modifier = Modifier.weight(1f).padding(8.dp)) {
             BoardArea(
                 topGameBoxes = topGameBoxes,
                 bottomGameBoxes = bottomGameBoxes,
@@ -329,7 +312,6 @@ fun DrawPortrait(
                 allPlayers = allPlayers,
                 gameMessage = gameMessage,
                 centerContent = {
-                    // Dice
                     if (currentDiceRoll != null) {
                         RollDice(
                             result = currentDiceRoll,
@@ -364,6 +346,8 @@ fun DrawLandscape(
     leftGameBoxes: List<GameBox>,
     rightGameBoxes: List<GameBox>,
     allPlayers: List<Player>,
+    currentPlayerName: String,
+    currentPlayerId: Int,
     currentPlayerMoney: Int,
     ownedPropertyIcons: List<Int>,
     onBuyProperty: () -> Unit,
@@ -377,30 +361,21 @@ fun DrawLandscape(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(6.dp),
+        modifier = modifier.fillMaxSize().padding(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Left
+        // Left Column: Owned Properties
         Column(
-            modifier = Modifier
-                .weight(0.15f)
-                .padding(end = 10.dp),
+            modifier = Modifier.weight(0.15f).padding(end = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            SmartPropertiesArea(
-                ownedPropertyIcons = ownedPropertyIcons,
-            )
+            SmartPropertiesArea(ownedPropertyIcons = ownedPropertyIcons)
         }
 
-        // Mid
+        // Mid Box: Board
         Box(
-            modifier = Modifier
-                .weight(0.55f)
-                .fillMaxHeight()
-                .padding(horizontal = 16.dp),
+            modifier = Modifier.weight(0.55f).fillMaxHeight().padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             BoardArea(
@@ -411,7 +386,6 @@ fun DrawLandscape(
                 allPlayers = allPlayers,
                 gameMessage = gameMessage,
                 centerContent = {
-                    // Dice
                     if (currentDiceRoll != null) {
                         RollDice(
                             result = currentDiceRoll,
@@ -422,32 +396,28 @@ fun DrawLandscape(
             )
         }
 
-        // Right
+        // Right Column: Info and Actions
         Column(
-            modifier = Modifier
-                .weight(0.3f)
-                .fillMaxHeight()
-                .padding(start = 6.dp),
+            modifier = Modifier.weight(0.3f).fillMaxHeight().padding(start = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Header icons
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(0.1f),
+                modifier = Modifier.fillMaxWidth().weight(0.1f),
                 horizontalArrangement = Arrangement.End
             ) {
                 SmartHeaderButtons(onExitGame = onExit)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            // Turn Info in Landscape
+            TurnInfo(
+                playerName = currentPlayerName,
+                playerIconRes = getTokenByPlayerId(currentPlayerId),
+                modifier = Modifier.weight(0.15f).padding(vertical = 4.dp)
+            )
 
             // Timer
             Row(
-                modifier = modifier
-                    .fillMaxSize()
-                    .weight(0.25f)
-                    .fillMaxHeight(),
+                modifier = Modifier.fillMaxWidth().weight(0.15f),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -456,11 +426,7 @@ fun DrawLandscape(
 
             // Action area
             Row(
-                modifier = modifier
-                    .fillMaxSize()
-                    .weight(0.75f)
-                    .fillMaxHeight()
-                    .padding(start = 16.dp),
+                modifier = Modifier.fillMaxWidth().weight(0.6f).padding(start = 16.dp),
             ) {
                 ShowPlayerActions(
                     currentPlayerMoney = currentPlayerMoney,
@@ -475,7 +441,6 @@ fun DrawLandscape(
             }
         }
     }
-
 }
 
 @Preview(showBackground = true, widthDp = 600, heightDp = 250)
