@@ -1,23 +1,29 @@
 package com.example.monopoly.ui.screens
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -48,12 +54,24 @@ class ConfigActivity : ComponentActivity() {
 @Composable
 fun ConfigScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    var numPlayers by remember { mutableIntStateOf(0) }
-    val playerNames = remember { mutableStateListOf("", "", "", "") }
-    var isTimerEnabled by remember { mutableStateOf(false) }
-    var timeLimitText by remember { mutableStateOf("") }
+    
+    // Use rememberSaveable for basic types
+    var numPlayers by rememberSaveable { mutableIntStateOf(0) }
+    
+    // Custom saver for the SnapshotStateList of player names
+    val playerNames = rememberSaveable(saver = listSaver(
+        save = { it.toList() },
+        restore = { mutableStateListOf(*it.toTypedArray()) }
+    )) { mutableStateListOf("", "", "", "") }
+    
+    var isTimerEnabled by rememberSaveable { mutableStateOf(false) }
+    var timeLimitText by rememberSaveable { mutableStateOf("") }
+
+    // Detect orientation
+    val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
     ConfigContent(
+        isPortrait = isPortrait,
         numPlayers = numPlayers,
         playerNames = playerNames,
         isTimerEnabled = isTimerEnabled,
@@ -92,6 +110,52 @@ fun ConfigScreen(modifier: Modifier = Modifier) {
  */
 @Composable
 fun ConfigContent(
+    isPortrait: Boolean,
+    numPlayers: Int,
+    playerNames: List<String>,
+    isTimerEnabled: Boolean,
+    timeLimitText: String,
+    onNumPlayersChange: (Int) -> Unit,
+    onPlayerNameChange: (Int, String) -> Unit,
+    onTimerToggle: (Boolean) -> Unit,
+    onTimeLimitChange: (String) -> Unit,
+    onExit: () -> Unit,
+    onStartGame: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (isPortrait) {
+        DrawConfigPortrait(
+            numPlayers = numPlayers,
+            playerNames = playerNames,
+            isTimerEnabled = isTimerEnabled,
+            timeLimitText = timeLimitText,
+            onNumPlayersChange = onNumPlayersChange,
+            onPlayerNameChange = onPlayerNameChange,
+            onTimerToggle = onTimerToggle,
+            onTimeLimitChange = onTimeLimitChange,
+            onExit = onExit,
+            onStartGame = onStartGame,
+            modifier = modifier
+        )
+    } else {
+        DrawConfigLandscape(
+            numPlayers = numPlayers,
+            playerNames = playerNames,
+            isTimerEnabled = isTimerEnabled,
+            timeLimitText = timeLimitText,
+            onNumPlayersChange = onNumPlayersChange,
+            onPlayerNameChange = onPlayerNameChange,
+            onTimerToggle = onTimerToggle,
+            onTimeLimitChange = onTimeLimitChange,
+            onExit = onExit,
+            onStartGame = onStartGame,
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+fun DrawConfigPortrait(
     numPlayers: Int,
     playerNames: List<String>,
     isTimerEnabled: Boolean,
@@ -116,7 +180,9 @@ fun ConfigContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Select players number
@@ -150,6 +216,78 @@ fun ConfigContent(
             isEnabled = numPlayers > 0,
             onClick = onStartGame
         )
+    }
+}
+
+@Composable
+fun DrawConfigLandscape(
+    numPlayers: Int,
+    playerNames: List<String>,
+    isTimerEnabled: Boolean,
+    timeLimitText: String,
+    onNumPlayersChange: (Int) -> Unit,
+    onPlayerNameChange: (Int, String) -> Unit,
+    onTimerToggle: (Boolean) -> Unit,
+    onTimeLimitChange: (String) -> Unit,
+    onExit: () -> Unit,
+    onStartGame: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        ConfigHeader(onExit = onExit)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            // Left side: Players info
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                PlayerCountSelector(
+                    currentCount = numPlayers,
+                    onCountSelected = onNumPlayersChange
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                PlayerNameInputs(
+                    numPlayers = numPlayers,
+                    playerNames = playerNames,
+                    onNameChange = onPlayerNameChange
+                )
+            }
+
+            // Right side: Timer and Action
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                    TimerConfiguration(
+                        isEnabled = isTimerEnabled,
+                        timeLimitText = timeLimitText,
+                        onToggle = onTimerToggle,
+                        onTimeChange = onTimeLimitChange
+                    )
+                }
+
+                StartGameButton(
+                    isEnabled = numPlayers > 0,
+                    onClick = onStartGame,
+                    modifier = Modifier.padding(bottom = 0.dp) // No bottom padding needed in landscape
+                )
+            }
+        }
     }
 }
 
@@ -297,12 +435,13 @@ fun TimerConfiguration(
 @Composable
 fun StartGameButton(
     isEnabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
         enabled = isEnabled,
-        modifier = Modifier
+        modifier = modifier
             .padding(bottom = 32.dp)
             .height(56.dp)
             .width(200.dp),
