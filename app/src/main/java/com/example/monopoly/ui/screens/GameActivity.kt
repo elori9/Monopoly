@@ -2,6 +2,7 @@ package com.example.monopoly.ui.screens
 
 import android.content.Intent
 import android.content.res.Configuration
+import android.media.SoundPool
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +14,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.monopoly.R
@@ -78,6 +80,9 @@ fun GameScreen(
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Context
+    val context = LocalContext.current
+
     // Manage Model State
 
     val board = remember {
@@ -139,6 +144,19 @@ fun GameScreen(
     // Orientation
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
+    // Sounds
+    val soundPool = remember { SoundPool.Builder().build() }
+
+    // DiceSound
+    val diceSoundId = remember { soundPool.load(context, R.raw.diceroll, 1) }
+
+    // Clean memory on exit as the mp3 are loaded on RAM since start of screen on sound pool
+    DisposableEffect(Unit) {
+        onDispose {
+            soundPool.release()
+        }
+    }
+
     GameContent(
         isPortrait = isPortrait,
         initialMinutes = initialMinutes,
@@ -176,6 +194,7 @@ fun GameScreen(
                 action?.invoke(false)
             } else {
                 // roll
+                soundPool.play(diceSoundId, 1f, 1f, 0, 0, 1f)
                 val action = viewModel.turnAction
                 viewModel.turnAction = null
                 action?.invoke(TurnAction.ROLL_DICE)
