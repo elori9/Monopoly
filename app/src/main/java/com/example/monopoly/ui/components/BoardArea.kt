@@ -219,7 +219,7 @@ fun DrawBox(
 /**
  * Parse the player to an icon
  */
-private fun getTokenByPlayerId(playerId: Int): Int {
+fun getTokenByPlayerId(playerId: Int): Int {
     return when (playerId) {
         0 -> R.drawable.icon1
         1 -> R.drawable.icon2

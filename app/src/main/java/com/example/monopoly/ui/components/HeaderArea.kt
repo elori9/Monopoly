@@ -1,5 +1,6 @@
 package com.example.monopoly.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,12 +24,14 @@ import java.util.Locale
 
 
 /**
- * Stateless function: Purely visual representation.
+ * Stateless function: Purely visual representation of the header.
  */
 @Composable
 fun HeaderAreaPortrait(
     secondsRemaining: Long,
     isTimerEnabled: Boolean,
+    currentPlayerName: String,
+    currentPlayerId: Int,
     onExitGame: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -38,23 +42,81 @@ fun HeaderAreaPortrait(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Spacer to keep the timer centered (adjusted to button size)
-        Spacer(modifier = Modifier.width(48.dp))
+        // Timer on the left
+        Box(modifier = Modifier.width(100.dp)) {
+            GameTimer(
+                secondsRemaining = secondsRemaining,
+                isTimerEnabled = isTimerEnabled
+            )
+        }
 
-        // Timer
-        GameTimer(
-            secondsRemaining = secondsRemaining,
-            isTimerEnabled = isTimerEnabled
+        // Turn info in the middle
+        TurnInfo(
+            playerName = currentPlayerName,
+            playerIconRes = getPlayerTokenById(currentPlayerId),
+            modifier = Modifier.weight(1f)
         )
-        // Buttons
-        SmartHeaderButtons(
-            onExitGame = onExitGame
-        )
+
+        // Buttons on the right
+        Box(modifier = Modifier.width(100.dp), contentAlignment = Alignment.CenterEnd) {
+            SmartHeaderButtons(
+                onExitGame = onExitGame
+            )
+        }
     }
 }
 
 /**
- * Stateless function: draws te timer
+ * Stateless function: draws the turn info with player icon and name
+ */
+@Composable
+fun TurnInfo(
+    playerName: String,
+    playerIconRes: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+    ) {
+        Text(
+            text = "Current Turn:",
+            fontSize = 12.sp,
+            color = Color.Gray,
+            fontWeight = FontWeight.Medium
+        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(id = playerIconRes),
+                contentDescription = null,
+                modifier = Modifier.size(35.dp).padding(end = 8.dp)
+            )
+            Text(
+                text = playerName,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+/**
+ * Helper function to map player ID to its corresponding icon resource.
+ * Renamed to avoid conflict with BoardArea.kt
+ */
+fun getPlayerTokenById(playerId: Int): Int {
+    return when (playerId) {
+        0 -> R.drawable.icon1
+        1 -> R.drawable.icon2
+        2 -> R.drawable.icon3
+        3 -> R.drawable.icon4
+        else -> R.drawable.icon1
+    }
+}
+
+/**
+ * Stateless function: draws the timer
  */
 @Composable
 fun GameTimer(
@@ -65,7 +127,7 @@ fun GameTimer(
     if (isTimerEnabled) {
         Text(
             text = stringResource(id = R.string.TimeLabel, formatTime(secondsRemaining)),
-            fontSize = 20.sp,
+            fontSize = 16.sp,
             fontWeight = FontWeight.ExtraBold,
             color = Color.Black,
             modifier = modifier
@@ -88,7 +150,7 @@ fun HeaderButtons(
     // Exit Button (Door)
     Box(
         modifier = Modifier
-            .size(20.dp)
+            .size(40.dp)
             .background(Color.Gray, shape = RoundedCornerShape(8.dp))
             .clickable { onMenuClick() },
         contentAlignment = Alignment.Center
@@ -97,7 +159,7 @@ fun HeaderButtons(
             imageVector = Icons.AutoMirrored.Filled.ExitToApp,
             contentDescription = stringResource(id = R.string.Exit),
             tint = Color.White,
-            modifier = Modifier.size(15.dp)
+            modifier = Modifier.size(24.dp)
         )
     }
 
@@ -161,6 +223,8 @@ fun HeaderAreaPortraitPreview() {
         HeaderAreaPortrait(
             secondsRemaining = 900L,
             isTimerEnabled = true,
+            currentPlayerName = "Player 1",
+            currentPlayerId = 0,
             onExitGame = {}
         )
     }
