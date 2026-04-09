@@ -4,6 +4,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -35,12 +36,12 @@ fun RollDice(modifier: Modifier = Modifier, result: Int, onRollClick: () -> Unit
     // Animate
     val rotationDice by animateFloatAsState(
         targetValue = rotation,
-        animationSpec = tween (durationMillis = 250, easing = LinearEasing),
+        animationSpec = tween(durationMillis = 250, easing = LinearEasing),
         label = "rotation"
     )
 
     // Recreate when rotation change state
-    LaunchedEffect (result) {
+    LaunchedEffect(result) {
         if (result != 1 || rotation != 0f) {
             // For just rolling on click
             rotation += 360f
@@ -60,15 +61,13 @@ fun RollDice(modifier: Modifier = Modifier, result: Int, onRollClick: () -> Unit
             painter = painterResource(imageResource),
             contentDescription = result.toString(),
             // Make rotation
-            modifier = Modifier.graphicsLayer{
-                rotationZ = rotationDice
-            }
+            modifier = Modifier
+                .graphicsLayer {
+                    rotationZ = rotationDice
+                }
+                // Rotation just on clicking the image
+                .clickable { onRollClick() }
         )
-        Button(
-            onClick = onRollClick,
-        ) {
-            Text(text = stringResource(R.string.roll), fontSize = 24.sp)
-        }
     }
 }
 
