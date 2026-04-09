@@ -30,6 +30,7 @@ import game.model.TurnAction
 import game.model.box.BoxName
 import game.model.box.GameBox
 import kotlinx.coroutines.delay
+import kotlin.invoke
 
 class GameActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -81,8 +82,8 @@ fun GameScreen(
     val viewModel = remember { GameViewModel() }
 
     val controller = remember(board) {
-        val players = playerNames.mapIndexed { index, name -> 
-            Player(id = index, name = name, money = 2000) 
+        val players = playerNames.mapIndexed { index, name ->
+            Player(id = index, name = name, money = 2000)
         }
         viewModel.playersState.addAll(players)
 
@@ -106,11 +107,12 @@ fun GameScreen(
     val topBoxes = board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1)
     val rightBoxes = board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size)
 
-    val currentOwnedIcons = remember(viewModel.currentPlayer, viewModel.currentPlayer?.properties?.size) {
-        viewModel.currentPlayer?.properties?.map { property ->
-            getCardIconByName(property.name)
-        } ?: emptyList()
-    }
+    val currentOwnedIcons =
+        remember(viewModel.currentPlayer, viewModel.currentPlayer?.properties?.size) {
+            viewModel.currentPlayer?.properties?.map { property ->
+                getCardIconByName(property.name)
+            } ?: emptyList()
+        }
 
     // 3. Manage UI State (Timer)
     var secondsRemaining by rememberSaveable(initialMinutes) {
@@ -143,6 +145,7 @@ fun GameScreen(
 
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
+
     // 4. Delegate to Stateless Content
     GameContent(
         isPortrait = isPortrait,
@@ -170,22 +173,23 @@ fun GameScreen(
             action?.invoke(TurnAction.BUILD_HOUSE)
         },
         onNextTurn = {
-            if (viewModel.buyProperty != null) {
-                val action = viewModel.buyProperty
-                viewModel.buyProperty = null
-                action?.invoke(false)
-            } else {
-                // Play sound and roll
-                soundPool.play(diceSoundId, 1f, 1f, 0, 0, 1f)
-                val action = viewModel.turnAction
-                viewModel.turnAction = null
-                action?.invoke(TurnAction.ROLL_DICE)
-            }
+            // End turn
+            val action = viewModel.endTurnAction
+            viewModel.endTurnAction = null // Clean for deactivate the button
+            action?.invoke()
+        },
+        onRollDice = {
+            // Play sound and roll
+            val action = viewModel.turnAction
+            viewModel.turnAction = null
+            soundPool.play(diceSoundId, 1f, 1f, 0, 0, 1f)
+            action?.invoke(TurnAction.ROLL_DICE)
         },
         canBuyProperty = viewModel.buyProperty != null,
         canBuyHouse = viewModel.turnAction != null,
-        canNextTurn = viewModel.turnAction != null || viewModel.buyProperty != null,
+        canNextTurn = viewModel.endTurnAction != null,
         currentDiceRoll = viewModel.dice,
+        canRoll = viewModel.turnAction != null,
         modifier = modifier
     )
 }
@@ -203,9 +207,10 @@ fun getCardIconByName(name: String): Int {
         BoxName.PARK.displayName -> R.drawable.park
         BoxName.GREASY.displayName -> R.drawable.greasy
         BoxName.TILTED.displayName -> R.drawable.tilted
-        else -> R.drawable.icon1 
+        else -> R.drawable.icon1
     }
 }
+
 
 /**
  * Stateless version of the Game Screen.
@@ -229,11 +234,13 @@ fun GameContent(
     onBuyProperty: () -> Unit,
     onBuyHouse: () -> Unit,
     onNextTurn: () -> Unit,
+    onRollDice: () -> Unit,
     gameMessage: String,
     canBuyProperty: Boolean,
     canBuyHouse: Boolean,
     canNextTurn: Boolean,
     currentDiceRoll: Int?,
+    canRoll: Boolean,
     modifier: Modifier = Modifier
 ) {
     if (isPortrait) {
@@ -251,6 +258,7 @@ fun GameContent(
             currentPlayerMoney = currentPlayerMoney,
             ownedPropertyIcons = ownedPropertyIcons,
             gameMessage = gameMessage,
+            onRollDice = onRollDice,
             onBuyProperty = onBuyProperty,
             onBuyHouse = onBuyHouse,
             onNextTurn = onNextTurn,
@@ -258,6 +266,7 @@ fun GameContent(
             canBuyHouse = canBuyHouse,
             canNextTurn = canNextTurn,
             currentDiceRoll = currentDiceRoll,
+            canRoll = canRoll,
             modifier = modifier
         )
     } else {
@@ -275,6 +284,7 @@ fun GameContent(
             currentPlayerMoney = currentPlayerMoney,
             ownedPropertyIcons = ownedPropertyIcons,
             gameMessage = gameMessage,
+            onRollDice = onRollDice,
             onBuyProperty = onBuyProperty,
             onBuyHouse = onBuyHouse,
             onNextTurn = onNextTurn,
@@ -282,6 +292,7 @@ fun GameContent(
             canBuyHouse = canBuyHouse,
             canNextTurn = canNextTurn,
             currentDiceRoll = currentDiceRoll,
+            canRoll = canRoll,
             modifier = modifier
         )
     }
@@ -305,10 +316,12 @@ fun DrawPortrait(
     onBuyHouse: () -> Unit,
     onNextTurn: () -> Unit,
     gameMessage: String,
+    onRollDice: () -> Unit,
     canBuyProperty: Boolean,
     canBuyHouse: Boolean,
     canNextTurn: Boolean,
     currentDiceRoll: Int?,
+    canRoll: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -322,7 +335,11 @@ fun DrawPortrait(
         )
 
         // Middle Section: The Board
-        Box(modifier = Modifier.weight(1f).padding(8.dp)) {
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(8.dp)
+        ) {
             BoardArea(
                 topGameBoxes = topGameBoxes,
                 bottomGameBoxes = bottomGameBoxes,
@@ -331,12 +348,12 @@ fun DrawPortrait(
                 allPlayers = allPlayers,
                 gameMessage = gameMessage,
                 centerContent = {
-                    if (currentDiceRoll != null) {
-                        RollDice(
-                            result = currentDiceRoll,
-                            onRollClick = { onNextTurn() }
-                        )
-                    }
+                    val displayResult = currentDiceRoll ?: 1 // Shouldn't fail and get 1
+                    RollDice(
+                        result = displayResult,
+                        onRollClick = onRollDice,
+                        enabled = canRoll
+                    )
                 }
             )
         }
@@ -373,28 +390,37 @@ fun DrawLandscape(
     onBuyHouse: () -> Unit,
     onNextTurn: () -> Unit,
     gameMessage: String,
+    onRollDice: () -> Unit,
     canBuyProperty: Boolean,
     canBuyHouse: Boolean,
     canNextTurn: Boolean,
     currentDiceRoll: Int?,
+    canRoll: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.fillMaxSize().padding(6.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Left Column: Owned Properties
         Column(
-            modifier = Modifier.weight(0.15f).padding(end = 10.dp),
+            modifier = Modifier
+                .weight(0.15f)
+                .padding(end = 10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             SmartPropertiesArea(ownedPropertyIcons = ownedPropertyIcons)
         }
 
-        // Mid Box: Board
+        // Middle Box: Board
         Box(
-            modifier = Modifier.weight(0.55f).fillMaxHeight().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .weight(0.55f)
+                .fillMaxHeight()
+                .padding(horizontal = 16.dp),
             contentAlignment = Alignment.Center
         ) {
             BoardArea(
@@ -405,23 +431,28 @@ fun DrawLandscape(
                 allPlayers = allPlayers,
                 gameMessage = gameMessage,
                 centerContent = {
-                    if (currentDiceRoll != null) {
-                        RollDice(
-                            result = currentDiceRoll,
-                            onRollClick = { onNextTurn() }
-                        )
-                    }
+                    val displayResult = currentDiceRoll ?: 1 // Shouldn't fail and get 1
+                    RollDice(
+                        result = displayResult,
+                        onRollClick = onRollDice,
+                        enabled = canRoll
+                    )
                 }
             )
         }
 
         // Right Column: Info and Actions
         Column(
-            modifier = Modifier.weight(0.3f).fillMaxHeight().padding(start = 6.dp),
+            modifier = Modifier
+                .weight(0.3f)
+                .fillMaxHeight()
+                .padding(start = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth().weight(0.1f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.1f),
                 horizontalArrangement = Arrangement.End
             ) {
                 SmartHeaderButtons(onExitGame = onExit)
@@ -431,12 +462,16 @@ fun DrawLandscape(
             TurnInfo(
                 playerName = currentPlayerName,
                 playerIconRes = getTokenByPlayerId(currentPlayerId),
-                modifier = Modifier.weight(0.15f).padding(vertical = 4.dp)
+                modifier = Modifier
+                    .weight(0.15f)
+                    .padding(vertical = 4.dp)
             )
 
             // Timer
             Row(
-                modifier = Modifier.fillMaxWidth().weight(0.15f),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.15f),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -445,7 +480,10 @@ fun DrawLandscape(
 
             // Action area
             Row(
-                modifier = Modifier.fillMaxWidth().weight(0.6f).padding(start = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.6f)
+                    .padding(start = 16.dp),
             ) {
                 ShowPlayerActions(
                     currentPlayerMoney = currentPlayerMoney,

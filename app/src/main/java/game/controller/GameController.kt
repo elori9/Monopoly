@@ -88,7 +88,7 @@ class GameController(
     }
 
     private fun playTurn(currentPlayer: Player) {
-// Roll the dice and show it
+        // Roll the dice and show it
         val roll = dice.roll()
         view.showDiceRoll(currentPlayer.name, roll)
 
@@ -120,9 +120,14 @@ class GameController(
     }
 
     private fun endTurnAndPass() {
-        // Next turn
-        turn = (turn + 1) % players.size
-        nextTurn()
+        // Wait for user to end turn
+        view.showEndTurnButton(
+            onEndTurn = {
+                // Next turn
+                turn = (turn + 1) % players.size
+                nextTurn()
+            }
+        )
     }
 
     private fun buildHouse(currentPlayer: Player) {

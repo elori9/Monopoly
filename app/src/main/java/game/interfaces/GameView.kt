@@ -77,4 +77,9 @@ interface GameView {
      * @param position the position
      */
     fun updatePropertyOwner(playerId: Int, position: Int)
+
+    /**
+     * Will activate the end turn button
+     */
+    fun showEndTurnButton(onEndTurn: () -> Unit)
 }

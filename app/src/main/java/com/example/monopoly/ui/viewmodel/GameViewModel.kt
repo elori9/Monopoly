@@ -24,6 +24,7 @@ class GameViewModel : GameView {
     // Those will be the callbacks
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
     var buyProperty: ((Boolean) -> Unit)? by mutableStateOf(null)
+    var endTurnAction: (() -> Unit)? by mutableStateOf(null)
 
 
     override fun showMessage(message: String) {
@@ -88,6 +89,11 @@ class GameViewModel : GameView {
     override fun updatePropertyOwner(playerId: Int, position: Int) {
         // No need
     }
+
+    override fun showEndTurnButton(onEndTurn: () -> Unit) {
+        endTurnAction = onEndTurn
+    }
+
 
     /**
      * This functions does nothing, just calls compose to recompose the screen (for updating money and position)

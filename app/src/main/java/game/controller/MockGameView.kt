@@ -65,6 +65,11 @@ class MockGameView : GameView {
         println("GUI: New owner on $position for the player $playerId")
     }
 
+    override fun showEndTurnButton(onEndTurn: () -> Unit) {
+        onEndTurn()
+    }
+
+
     override fun showTurnOptions(player: Player, onActionSelected: (TurnAction) -> Unit) {
         // Make n turns for testing
         if (turnsPlayed < turnsToPlay) {

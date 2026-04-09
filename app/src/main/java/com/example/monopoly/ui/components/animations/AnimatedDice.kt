@@ -29,7 +29,7 @@ import game.model.Dice
  * Roll dice animation
  */
 @Composable
-fun RollDice(modifier: Modifier = Modifier, result: Int, onRollClick: () -> Unit) {
+fun RollDice(modifier: Modifier = Modifier, result: Int, onRollClick: () -> Unit, enabled: Boolean = true) {
     // Rotation state
     var rotation by remember { mutableFloatStateOf(0f) }
 
@@ -66,7 +66,7 @@ fun RollDice(modifier: Modifier = Modifier, result: Int, onRollClick: () -> Unit
                     rotationZ = rotationDice
                 }
                 // Rotation just on clicking the image
-                .clickable { onRollClick() }
+                .clickable { if(enabled) onRollClick() }
         )
     }
 }
