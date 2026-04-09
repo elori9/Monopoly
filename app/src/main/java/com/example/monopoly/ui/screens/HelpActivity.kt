@@ -16,8 +16,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 import com.example.monopoly.ui.theme.MonopolyTheme
+import coil.compose.AsyncImage
 
 object Constants {
     const val GITHUB_LINK = "https://github.com/"
@@ -116,73 +116,86 @@ fun HelpContent(
     onClickButton: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Scroll
-    val scrollState = rememberScrollState()
 
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(scrollState)
     ) {
-        // Header
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            // Back button
-            IconButton(onClick = onBackClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+        item {
+            // Header
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Back button
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+                // Tittle
+                Text(
+                    text = stringResource(R.string.HowPlay),
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
-            // Tittle
-            Text(
-                text = stringResource(R.string.HowPlay),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp)
-            )
         }
 
-        HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 16.dp))
+        item {
+            HorizontalDivider(thickness = 2.dp, modifier = Modifier.padding(vertical = 16.dp))
+        }
 
-        // Body
-        Text(
-            text = stringResource(R.string.Instructions),
-            fontSize = 16.sp,
-            lineHeight = 28.sp,
-            textAlign = TextAlign.Justify,
-            modifier = Modifier.fillMaxWidth()
-        )
+        item {
 
-        Spacer(modifier = Modifier.height(32.dp))
+            // Body
+            Text(
+                text = stringResource(R.string.Instructions),
+                fontSize = 16.sp,
+                lineHeight = 28.sp,
+                textAlign = TextAlign.Justify,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+        }
 
-        // Pieces
-        SectionTitle(stringResource(R.string.PiecesInfo))
-        ShowPieces()
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            // Pieces
+            SectionTitle(stringResource(R.string.PiecesInfo))
+            ShowPieces()
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        // Money
-        SectionTitle(stringResource(R.string.EconomyInfo))
-        ShowEconomy()
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            // Money
+            SectionTitle(stringResource(R.string.EconomyInfo))
+            ShowEconomy()
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        // Show special boxes
-        SectionTitle(stringResource(R.string.SpecialBoxesInfo))
-        ShowSpecialBoxes(onBoxClick)
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            // Show special boxes
+            SectionTitle(stringResource(R.string.SpecialBoxesInfo))
+            ShowSpecialBoxes(onBoxClick)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        // Show boxes (Passing the click callback)
-        SectionTitle(stringResource(R.string.BoxesInfo))
-        ShowBoxes(onBoxClick)
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            // Show boxes (Passing the click callback)
+            SectionTitle(stringResource(R.string.BoxesInfo))
+            ShowBoxes(onBoxClick)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        // Show additional info
-        SectionTitle(stringResource(R.string.AdditionalInfoTitle))
-        ShowAdditionalInfo(onClickButton)
-        Spacer(modifier = Modifier.height(24.dp))
+        item {
+            // Show additional info
+            SectionTitle(stringResource(R.string.AdditionalInfoTitle))
+            ShowAdditionalInfo(onClickButton)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 }
 
@@ -299,8 +312,8 @@ fun TokenPreview(imageId: Int, label: String, onClick: (() -> Unit)? = null) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.padding(8.dp)
     ) {
-        Image(
-            painter = painterResource(id = imageId),
+        AsyncImage(
+            model = imageId,
             contentDescription = label,
             modifier = Modifier.size(64.dp)
         )
@@ -317,7 +330,7 @@ fun TokenPreview(imageId: Int, label: String, onClick: (() -> Unit)? = null) {
 
 @Composable
 fun ShowAdditionalInfo(onClick: () -> Unit) {
-    Row (
+    Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
