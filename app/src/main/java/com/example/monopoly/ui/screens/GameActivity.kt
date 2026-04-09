@@ -1,9 +1,11 @@
 package com.example.monopoly.ui.screens
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.media.SoundPool
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -74,6 +76,8 @@ fun GameScreen(
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     // 1. Manage Model State
     val board = remember(numPlayers) {
         Board().apply { generateBoard(numPlayers) }
@@ -125,10 +129,11 @@ fun GameScreen(
                 delay(1000L)
                 secondsRemaining--
             }
+            val logMsg = "MSG"
+            sendEndGameLog(context, logMsg)
         }
     }
     // 4. Add sounds
-    val context = LocalContext.current
 
     // Sound manager
     val soundPool = remember { SoundPool.Builder().build() }
@@ -146,7 +151,7 @@ fun GameScreen(
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
 
-    // 4. Delegate to Stateless Content
+    // 5. Delegate to Stateless Content
     GameContent(
         isPortrait = isPortrait,
         initialMinutes = initialMinutes,
@@ -498,6 +503,14 @@ fun DrawLandscape(
             }
         }
     }
+}
+
+
+private fun sendEndGameLog(context: Context, info: String) {
+    val intent = Intent(context, Results::class.java).apply {
+        putExtra("INFO", info)
+    }
+    context.startActivity(intent)
 }
 
 @Preview(showBackground = true, widthDp = 600, heightDp = 250)
