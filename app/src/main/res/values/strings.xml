@@ -42,4 +42,5 @@
     <string name="Rolling"> rolled the dices and got a </string>
     <string name="Bankrupt"> got bankrupt </string>
     <string name="Win"> wins the game</string>
+    <string name="CurrentTurn">Current Turn:</string>
 </resources>

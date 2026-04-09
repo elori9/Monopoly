@@ -80,7 +80,7 @@ fun TurnInfo(
         modifier = modifier
     ) {
         Text(
-            text = "Current Turn:",
+            text = stringResource(id = R.string.CurrentTurn),
             fontSize = 12.sp,
             color = Color.Gray,
             fontWeight = FontWeight.Medium
@@ -103,7 +103,6 @@ fun TurnInfo(
 
 /**
  * Helper function to map player ID to its corresponding icon resource.
- * Renamed to avoid conflict with BoardArea.kt
  */
 fun getPlayerTokenById(playerId: Int): Int {
     return when (playerId) {
