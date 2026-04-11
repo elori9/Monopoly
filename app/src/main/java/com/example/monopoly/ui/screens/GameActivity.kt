@@ -133,6 +133,7 @@ fun GameScreen(
             sendEndGameLog(context, logMsg)
         }
     }
+
     // 4. Add sounds
 
     // Sound manager
@@ -140,6 +141,8 @@ fun GameScreen(
 
     // Sounds
     val diceSoundId = remember { soundPool.load(context, R.raw.diceroll, 1) }
+    val cashId = remember { soundPool.load(context, R.raw.cash, 1) }
+
 
     // Clean memory on exit as the mp3 are loaded on RAM since start of screen on sound pool
     DisposableEffect(Unit) {
@@ -169,6 +172,7 @@ fun GameScreen(
         gameMessage = viewModel.gameMessage,
         onBuyProperty = {
             val action = viewModel.buyProperty
+            soundPool.play(cashId, 1f, 1f, 0, 0, 1f)
             viewModel.buyProperty = null
             action?.invoke(true)
         },

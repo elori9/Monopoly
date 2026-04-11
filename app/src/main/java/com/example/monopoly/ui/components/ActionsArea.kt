@@ -87,7 +87,7 @@ fun OverlayForImage(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.8f))
-                    .clickable { onClose },
+                    .clickable { onClose() },
                 contentAlignment = Alignment.Center
             ) {
                 Image(
