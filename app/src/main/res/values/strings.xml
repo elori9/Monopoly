@@ -43,5 +43,13 @@
     <string name="Bankrupt"> got bankrupt </string>
     <string name="Win"> wins the game</string>
     <string name="CurrentTurn">Current Turn:</string>
-    <string name="title_activity_results">Results</string>
+    <string name="TittleGameResults">Results of the game</string>
+    <string name="GameResultDateTittle">Date and hour</string>
+    <string name="GameResultLogTittle">Log values</string>
+    <string name="GameResultEmailTittle">Destinatary e-mail</string>
+    <string name="DefaultEmail">examplename@example.com</string>
+    <string name="ButtonSendEmail">Send e-mail</string>
+    <string name="ButtonNewGame">New Game</string>
+    <string name="ButtonExit">Exit</string>
+    <string name="TextFieldEnterTextEmail">Enter e-mail</string>
 </resources>
