@@ -19,6 +19,8 @@ class GameController(
         private set
     var onGame: Boolean = false
     private var startTime: Long = 0L
+    var winner: Player? = null
+        private set
 
 
     /**
@@ -46,7 +48,8 @@ class GameController(
         // End game for just one player
         val activePlayers = players.filter { !it.broke }
         if (activePlayers.size == 1) {
-            view.showGameOver(activePlayers.first())
+            winner = activePlayers.first()
+            view.showGameOver(winner!!)
             return
         }
 
@@ -281,10 +284,11 @@ class GameController(
      */
     fun endGame() {
         // Search for the max Networh player
-        val winner = players.maxByOrNull { it.calculateNetworth() }
+        winner = players.maxByOrNull { it.calculateNetworth() }
 
-        if (winner != null) {
-            view.showGameOver(winner)
+        // Show the winner
+        winner?.let {
+            view.showGameOver(it)
         }
     }
 

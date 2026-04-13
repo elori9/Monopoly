@@ -52,4 +52,12 @@
     <string name="ButtonNewGame">New Game</string>
     <string name="ButtonExit">Exit</string>
     <string name="TextFieldEnterTextEmail">Enter e-mail</string>
+    <string name="LogTittle">Logs from the game: </string>
+    <string name="LogNumPlayers">The number of players is: </string>
+    <string name="LogNamePlayers">The players who played are: </string>
+    <string name="LogTimerOn">The timer is enabled, the time limit is: </string>
+    <string name="LogTimeOff">The timer is disabled. </string>
+    <string name="LogTimeOver">The game finished due a time over.</string>
+    <string name="LogWinner">The winner is: </string>
+    <string name="LogNoWinner">There is no winner for the game.</string>
 </resources>

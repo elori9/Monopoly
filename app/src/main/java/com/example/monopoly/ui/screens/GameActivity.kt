@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.monopoly.R
@@ -100,10 +101,6 @@ fun GameScreen(
         )
     }
 
-    LaunchedEffect(Unit) {
-        controller.startGame()
-    }
-
     // 2. Prepare data for components (Splitting board boxes)
     val boxesPerSide = board.size / 4
     val bottomBoxes = board.gameBoxes.subList(0, boxesPerSide + 1).reversed()
@@ -118,23 +115,31 @@ fun GameScreen(
             } ?: emptyList()
         }
 
-    // 3. Manage UI State (Timer)
+    // 3. Log variables
+    val logBuilder = remember { StringBuilder() }
+
+    // 4. Manage UI State (Timer)
     var secondsRemaining by rememberSaveable(initialMinutes) {
         mutableLongStateOf(initialMinutes.toLong() * 60L)
     }
 
-    if (initialMinutes > 0) {
+    if (initialMinutes > 0 && viewModel.winner == null) {
         LaunchedEffect(Unit) {
             while (secondsRemaining > 0) {
                 delay(1000L)
                 secondsRemaining--
             }
-            val logMsg = "MSG"
-            sendEndGameLog(context, logMsg)
+
+            // Time over
+            if (secondsRemaining == 0L && viewModel.winner == null) {
+                logBuilder.appendLine(context.getString(R.string.LogTimeOver))
+                // Advertise the controller
+                controller.endGame()
+            }
         }
     }
 
-    // 4. Add sounds
+    // 5. Add sounds
 
     // Sound manager
     val soundPool = remember { SoundPool.Builder().build() }
@@ -154,7 +159,39 @@ fun GameScreen(
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
 
-    // 5. Delegate to Stateless Content
+    // 6. Throw the launcher for logs
+    LaunchedEffect(Unit) {
+        // Logs
+        logBuilder.appendLine(context.getString(R.string.LogTittle))
+        logBuilder.appendLine(context.getString(R.string.LogNumPlayers) + numPlayers)
+        logBuilder.appendLine(
+            context.getString(R.string.LogNamePlayers) + playerNames.joinToString(
+                separator = ", "
+            )
+        )
+        logBuilder.appendLine(
+            if (initialMinutes > 0) context.getString(R.string.LogTimerOn) + initialMinutes
+            else context.getString(R.string.LogTimeOff)
+        )
+
+        // Controller
+        controller.startGame()
+    }
+
+    // 7. Throw a launcher for check if someone win for non-endtime
+    LaunchedEffect(viewModel.winner) {
+        val winner = viewModel.winner
+        if (winner != null) {
+            // Add log
+            logBuilder.appendLine("${context.getString(R.string.LogWinner)} ${winner.name}")
+
+            // Send log
+            sendEndGameLog(context, logBuilder.toString())
+        }
+    }
+
+
+    // 8. Delegate to Stateless Content
     GameContent(
         isPortrait = isPortrait,
         initialMinutes = initialMinutes,

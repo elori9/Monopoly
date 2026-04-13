@@ -20,6 +20,8 @@ class GameViewModel : GameView {
     var gameMessage by mutableStateOf("")
     var dice by mutableStateOf<Int?>(null)
     var currentPlayer by mutableStateOf<Player?>(null)
+    var winner by mutableStateOf<Player?>(null)
+        private set
 
     // Those will be the callbacks
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
@@ -82,7 +84,8 @@ class GameViewModel : GameView {
         }
     }
 
-    override fun showGameOver(winner: Player) {
+    override fun showGameOver(winner: Player){
+        this.winner = winner
         gameMessage = "${winner.name} winn"
     }
 
