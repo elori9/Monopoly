@@ -253,6 +253,17 @@ fun getCardIconByName(name: String): Int {
         BoxName.PARK.displayName -> R.drawable.park
         BoxName.GREASY.displayName -> R.drawable.greasy
         BoxName.TILTED.displayName -> R.drawable.tilted
+        BoxName.FLUSH.displayName -> R.drawable.flush
+        BoxName.DUSTY.displayName -> R.drawable.dusty
+        BoxName.SNOBBY.displayName -> R.drawable.snobby
+        BoxName.SHIFTY.displayName -> R.drawable.shifty
+        BoxName.WAILING.displayName -> R.drawable.wailing
+        BoxName.FATAL.displayName -> R.drawable.fatal
+        BoxName.JUNK.displayName -> R.drawable.junk
+        BoxName.HAUNTED.displayName -> R.drawable.haunted
+        BoxName.MOISTY.displayName -> R.drawable.moisty
+        BoxName.LUCKY_LANDING.displayName -> R.drawable.lucky
+
         else -> R.drawable.icon1
     }
 }

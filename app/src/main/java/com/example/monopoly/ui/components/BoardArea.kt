@@ -237,20 +237,37 @@ private fun getIconByName(name: String): Int {
     val normalizedName = name.trim().lowercase()
 
     return when (normalizedName) {
+        // Special Boxes
         BoxName.START.displayName.lowercase() -> R.drawable.icon7
+        BoxName.JAIL.displayName.lowercase() -> R.drawable.icon8
+        BoxName.LUCK.displayName.lowercase() -> R.drawable.icon9
+        BoxName.TAX.displayName.lowercase(),
+        BoxName.STORM.displayName.lowercase(),
+        BoxName.CAMPFIRE.displayName.lowercase(),
+        BoxName.SPIKE_TRAP.displayName.lowercase() -> R.drawable.icon10
+
+
         BoxName.LONELY.displayName.lowercase() -> R.drawable.lonely
         BoxName.TOMATO.displayName.lowercase() -> R.drawable.tomatotown
-        BoxName.JAIL.displayName.lowercase() -> R.drawable.icon8
         BoxName.RETAIL.displayName.lowercase() -> R.drawable.retail
         BoxName.LOOT.displayName.lowercase() -> R.drawable.lootlake
-        BoxName.LUCK.displayName.lowercase() -> R.drawable.icon9
         BoxName.SALTY.displayName.lowercase() -> R.drawable.salty
         BoxName.PARK.displayName.lowercase() -> R.drawable.park
-        BoxName.TAX.displayName.lowercase() -> R.drawable.icon10
         BoxName.GREASY.displayName.lowercase() -> R.drawable.greasy
         BoxName.TILTED.displayName.lowercase() -> R.drawable.tilted
 
-        else -> R.drawable.icon1 // Debug, shouldn't happen
+        BoxName.FLUSH.displayName.lowercase() -> R.drawable.flush
+        BoxName.DUSTY.displayName.lowercase() -> R.drawable.dusty
+        BoxName.SNOBBY.displayName.lowercase() -> R.drawable.snobby
+        BoxName.SHIFTY.displayName.lowercase() -> R.drawable.shifty
+        BoxName.WAILING.displayName.lowercase() -> R.drawable.wailing
+        BoxName.FATAL.displayName.lowercase() -> R.drawable.fatal
+        BoxName.JUNK.displayName.lowercase() -> R.drawable.junk
+        BoxName.HAUNTED.displayName.lowercase() -> R.drawable.haunted
+        BoxName.MOISTY.displayName.lowercase() -> R.drawable.moisty
+        BoxName.LUCKY_LANDING.displayName.lowercase() -> R.drawable.lucky
+
+        else -> R.drawable.icon1
     }
 }
 
