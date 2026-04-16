@@ -60,4 +60,11 @@
     <string name="LogTimeOver">The game finished due a time over.</string>
     <string name="LogWinner">The winner is: </string>
     <string name="LogNoWinner">There is no winner for the game.</string>
+    <string name="ActivateAdvancedConfiguration">Activate Advanced Configuration</string>
+    <string name="StartMoney">Add the amount of starting money</string>
+    <string name="PassGoMoney">Add the amount of money to receive on start box</string>
+    <string name="JailTurns">Add the amount of turns to jail</string>
+    <string name="TaxesPrices">Add the amount of taxes price</string>
+    <string name="TimerTimeLimit">Time Limit (minutes)</string>
+
 </resources>

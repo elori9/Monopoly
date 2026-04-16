@@ -43,12 +43,20 @@ class GameActivity : ComponentActivity() {
         val numPlayers = intent?.getIntExtra("NUM_PLAYERS", 2) ?: 2
         val playerNames = intent?.getStringArrayListExtra("PLAYER_NAMES") ?: arrayListOf()
         val timerMinutes = intent?.getIntExtra("TIME_LIMIT", 0) ?: 0
+        val startMoney = intent?.getIntExtra("STARTING_MONEY", 2000) ?: 2000
+        val passGoMoney = intent?.getIntExtra("PASS_GO_MONEY", 200) ?: 200
+        val jailTurns = intent?.getIntExtra("JAIL_TURNS", 3) ?: 3
+        val taxPrice = intent?.getIntExtra("TAX_PRICE", 200) ?: 200
 
         setContent {
             MonopolyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     GameScreen(
                         numPlayers = numPlayers,
+                        startMoney = startMoney,
+                        passGoMoney = passGoMoney,
+                        jailTurns = jailTurns,
+                        taxPrice = taxPrice,
                         playerNames = playerNames,
                         initialMinutes = timerMinutes,
                         onExit = {
@@ -72,6 +80,10 @@ class GameActivity : ComponentActivity() {
 @Composable
 fun GameScreen(
     numPlayers: Int,
+    startMoney: Int,
+    passGoMoney: Int,
+    jailTurns: Int,
+    taxPrice: Int,
     playerNames: List<String>,
     initialMinutes: Int,
     onExit: () -> Unit,
@@ -81,14 +93,14 @@ fun GameScreen(
 
     // 1. Manage Model State
     val board = remember(numPlayers) {
-        Board().apply { generateBoard(numPlayers) }
+        Board().apply { generateBoard(numPlayers, passGoMoney, jailTurns, taxPrice) }
     }
 
     val viewModel = remember { GameViewModel() }
 
     val controller = remember(board) {
         val players = playerNames.mapIndexed { index, name ->
-            Player(id = index, name = name, money = 2000)
+            Player(id = index, name = name, money = startMoney)
         }
         viewModel.playersState.addAll(players)
 
@@ -571,6 +583,10 @@ fun GameScreenLandscapePreview() {
     MonopolyTheme {
         GameScreen(
             numPlayers = 2,
+            startMoney = 2000,
+            passGoMoney = 200,
+            jailTurns = 3,
+            taxPrice = 200,
             playerNames = listOf("Player 1", "Player 2"),
             initialMinutes = 60,
             onExit = {}

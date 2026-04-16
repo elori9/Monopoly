@@ -17,7 +17,7 @@ class BoardTest {
     @Test
     @DisplayName("Generate board for 2 players")
     fun testGenerateBoard2Players() {
-        board.generateBoard(2)
+        board.generateBoard(2, 2000, 3, 200)
         assertEquals(12, board.size)
         assertEquals(12, board.gameBoxes.size)
         
@@ -30,7 +30,7 @@ class BoardTest {
     @Test
     @DisplayName("Generate board for 3 players")
     fun testGenerateBoard3Players() {
-        board.generateBoard(3)
+        board.generateBoard(3, 2000, 3, 200)
         assertEquals(20, board.size)
         assertEquals(20, board.gameBoxes.size)
         
@@ -43,7 +43,7 @@ class BoardTest {
     @Test
     @DisplayName("Generate board for 4 players")
     fun testGenerateBoard4Players() {
-        board.generateBoard(4)
+        board.generateBoard(4, 2000, 3, 200)
         assertEquals(24, board.size)
         assertEquals(24, board.gameBoxes.size)
         
@@ -56,7 +56,7 @@ class BoardTest {
     @Test
     @DisplayName("Get box with modulo (circular board)")
     fun testGetBoxModulo() {
-        board.generateBoard(2) // size 12
+        board.generateBoard(2, 2000, 3, 200) // size 12
         
         val box0 = board.getBox(0)
         val box12 = board.getBox(12)
@@ -70,7 +70,7 @@ class BoardTest {
     @Test
     @DisplayName("Verify properties in 4 player board")
     fun testProperties4Players() {
-        board.generateBoard(4)
+        board.generateBoard(4, 2000, 3, 200)
         
         val firstProp = board.getBox(1)
         assertTrue(firstProp is Property)

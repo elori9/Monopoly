@@ -254,8 +254,6 @@ class GameController(
             }
 
             is Start -> {
-                gameBox.action(player)
-                view.updatePlayerMoney(player.id, player.money)
                 view.showMessage("You got the start money")
 
                 // End the turn

@@ -22,6 +22,18 @@ class ConfigActivityViewModel : ViewModel() {
     var timeLimitText by mutableStateOf("")
         private set
 
+    // Advanced configuration variables
+    var advancedConfigEnabled by mutableStateOf(false)
+        private set
+    var startMoney by mutableStateOf("2000")
+        private set
+    var passGoMoney by mutableStateOf("200")
+        private set
+    var jailTurns by mutableStateOf("3")
+        private set
+    var taxesPrice by mutableStateOf("200")
+        private set
+
     // Functions
     fun updateNumPlayers(count: Int) {
         numPlayers = count
@@ -50,5 +62,27 @@ class ConfigActivityViewModel : ViewModel() {
     fun getFinalTimeLimit(): Int {
         // If is enabled use the time, otherwise no time -> 0
         return if (isTimerEnabled) timeLimitText.toIntOrNull() ?: 0 else 0
+    }
+
+    // Advanced configuration functions
+
+    fun toggleAdvancedConfig(isExpanded: Boolean) {
+        advancedConfigEnabled = isExpanded
+    }
+
+    fun updateStartingMoney(amount: String) {
+        startMoney = amount
+    }
+
+    fun updatePassGoMoney(amount: String) {
+        passGoMoney = amount
+    }
+
+    fun updateJailTurns(turns: String) {
+        jailTurns = turns
+    }
+
+    fun updateTaxesPrice(price: String) {
+        taxesPrice = price
     }
 }

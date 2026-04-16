@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -28,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
@@ -87,10 +89,24 @@ fun ConfigScreen(modifier: Modifier = Modifier, viewModel: ConfigActivityViewMod
                         ArrayList(viewModel.getSelectedPlayerNames())
                     )
                     putExtra("TIME_LIMIT", viewModel.getFinalTimeLimit())
+                    putExtra("STARTING_MONEY", viewModel.startMoney.toIntOrNull() ?: 2000)
+                    putExtra("PASS_GO_MONEY", viewModel.passGoMoney.toIntOrNull() ?: 200)
+                    putExtra("JAIL_TURNS", viewModel.jailTurns.toIntOrNull() ?: 3)
+                    putExtra("TAX_PRICE", viewModel.taxesPrice.toIntOrNull() ?: 200)
                 }
                 context.startActivity(intent)
             }
         },
+        isAdvancedExpanded = viewModel.advancedConfigEnabled,
+        startingMoney = viewModel.startMoney,
+        passGoMoney = viewModel.passGoMoney,
+        jailTurns = viewModel.jailTurns,
+        taxesPrice = viewModel.taxesPrice,
+        onAdvancedToggle = { viewModel.toggleAdvancedConfig(it) },
+        onStartingMoneyChange = { viewModel.updateStartingMoney(it) },
+        onPassGoMoneyChange = { viewModel.updatePassGoMoney(it) },
+        onJailTurnsChange = { viewModel.updateJailTurns(it) },
+        onTaxesPriceChange = { viewModel.updateTaxesPrice(it) },
         modifier = modifier
     )
 }
@@ -111,6 +127,16 @@ fun ConfigContent(
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
     onStartGame: () -> Unit,
+    isAdvancedExpanded: Boolean,
+    startingMoney: String,
+    passGoMoney: String,
+    jailTurns: String,
+    taxesPrice: String,
+    onAdvancedToggle: (Boolean) -> Unit,
+    onStartingMoneyChange: (String) -> Unit,
+    onPassGoMoneyChange: (String) -> Unit,
+    onJailTurnsChange: (String) -> Unit,
+    onTaxesPriceChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (isPortrait) {
@@ -125,6 +151,16 @@ fun ConfigContent(
             onTimeLimitChange = onTimeLimitChange,
             onExit = onExit,
             onStartGame = onStartGame,
+            isAdvancedExpanded = isAdvancedExpanded,
+            startingMoney = startingMoney,
+            passGoMoney = passGoMoney,
+            jailTurns = jailTurns,
+            taxesPrice = taxesPrice,
+            onAdvancedToggle = onAdvancedToggle,
+            onStartingMoneyChange = onStartingMoneyChange,
+            onPassGoMoneyChange = onPassGoMoneyChange,
+            onJailTurnsChange = onJailTurnsChange,
+            onTaxesPriceChange = onTaxesPriceChange,
             modifier = modifier
         )
     } else {
@@ -139,6 +175,16 @@ fun ConfigContent(
             onTimeLimitChange = onTimeLimitChange,
             onExit = onExit,
             onStartGame = onStartGame,
+            isAdvancedExpanded = isAdvancedExpanded,
+            startingMoney = startingMoney,
+            passGoMoney = passGoMoney,
+            jailTurns = jailTurns,
+            taxesPrice = taxesPrice,
+            onAdvancedToggle = onAdvancedToggle,
+            onStartingMoneyChange = onStartingMoneyChange,
+            onPassGoMoneyChange = onPassGoMoneyChange,
+            onJailTurnsChange = onJailTurnsChange,
+            onTaxesPriceChange = onTaxesPriceChange,
             modifier = modifier
         )
     }
@@ -156,42 +202,49 @@ fun DrawConfigPortrait(
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
     onStartGame: () -> Unit,
+    isAdvancedExpanded: Boolean,
+    startingMoney: String,
+    passGoMoney: String,
+    jailTurns: String,
+    taxesPrice: String,
+    onAdvancedToggle: (Boolean) -> Unit,
+    onStartingMoneyChange: (String) -> Unit,
+    onPassGoMoneyChange: (String) -> Unit,
+    onJailTurnsChange: (String) -> Unit,
+    onTaxesPriceChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header
-        ConfigHeader(onExit = onExit)
+        item {
+            ConfigHeader(onExit = onExit)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        item {
             // Select players number
             PlayerCountSelector(
                 currentCount = numPlayers,
                 onCountSelected = onNumPlayersChange
             )
-
             Spacer(modifier = Modifier.height(16.dp))
+        }
 
-            // Select players names
+        items(numPlayers) { index ->
             PlayerNameInputs(
-                numPlayers = numPlayers,
-                playerNames = playerNames,
-                onNameChange = onPlayerNameChange
+                index = index,
+                name = playerNames[index],
+                onNameChange = { newName -> onPlayerNameChange(index, newName) }
             )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
 
-            Spacer(modifier = Modifier.height(24.dp))
-
+        item {
             // Timer
             TimerConfiguration(
                 isEnabled = isTimerEnabled,
@@ -199,13 +252,33 @@ fun DrawConfigPortrait(
                 onToggle = onTimerToggle,
                 onTimeChange = onTimeLimitChange
             )
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // Start button
-        StartGameButton(
-            isEnabled = numPlayers > 0,
-            onClick = onStartGame
-        )
+        item {
+            // Advanced options
+            AdvancedConfiguration(
+                isEnabled = isAdvancedExpanded,
+                startingMoney = startingMoney,
+                passGoMoney = passGoMoney,
+                jailTurns = jailTurns,
+                taxesPrice = taxesPrice,
+                onAdvancedToggle = onAdvancedToggle,
+                onStartingMoneyChange = onStartingMoneyChange,
+                onPassGoMoneyChange = onPassGoMoneyChange,
+                onJailTurnsChange = onJailTurnsChange,
+                onTaxesPriceChange = onTaxesPriceChange,
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item {
+            // Start button
+            StartGameButton(
+                isEnabled = numPlayers > 0,
+                onClick = onStartGame
+            )
+        }
     }
 }
 
@@ -221,6 +294,16 @@ fun DrawConfigLandscape(
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
     onStartGame: () -> Unit,
+    isAdvancedExpanded: Boolean,
+    startingMoney: String,
+    passGoMoney: String,
+    jailTurns: String,
+    taxesPrice: String,
+    onAdvancedToggle: (Boolean) -> Unit,
+    onStartingMoneyChange: (String) -> Unit,
+    onPassGoMoneyChange: (String) -> Unit,
+    onJailTurnsChange: (String) -> Unit,
+    onTaxesPriceChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -229,40 +312,37 @@ fun DrawConfigLandscape(
             .padding(16.dp)
     ) {
         ConfigHeader(onExit = onExit)
-
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Left side: Players info
-            Column(
+            // Left side: Players info + timer
+            LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
             ) {
-                PlayerCountSelector(
-                    currentCount = numPlayers,
-                    onCountSelected = onNumPlayersChange
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                PlayerNameInputs(
-                    numPlayers = numPlayers,
-                    playerNames = playerNames,
-                    onNameChange = onPlayerNameChange
-                )
-            }
+                // Players count
+                item {
+                    PlayerCountSelector(
+                        currentCount = numPlayers,
+                        onCountSelected = onNumPlayersChange
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
-            // Right side: Timer and Action
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                // Players names
+                items(numPlayers) { index ->
+                    PlayerNameInputs(
+                        index = index,
+                        name = playerNames[index],
+                        onNameChange = { newName -> onPlayerNameChange(index, newName) }
+                    )
+                }
+
+                // Timer
+                item {
                     TimerConfiguration(
                         isEnabled = isTimerEnabled,
                         timeLimitText = timeLimitText,
@@ -270,16 +350,44 @@ fun DrawConfigLandscape(
                         onTimeChange = onTimeLimitChange
                     )
                 }
+            }
 
-                StartGameButton(
-                    isEnabled = numPlayers > 0,
-                    onClick = onStartGame,
-                    modifier = Modifier.padding(bottom = 0.dp) // No bottom padding needed in landscape
-                )
+            // Right side: advanced options + start button
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Advanced options
+                item {
+                    AdvancedConfiguration(
+                        isEnabled = isAdvancedExpanded,
+                        startingMoney = startingMoney,
+                        passGoMoney = passGoMoney,
+                        jailTurns = jailTurns,
+                        taxesPrice = taxesPrice,
+                        onAdvancedToggle = onAdvancedToggle,
+                        onStartingMoneyChange = onStartingMoneyChange,
+                        onPassGoMoneyChange = onPassGoMoneyChange,
+                        onJailTurnsChange = onJailTurnsChange,
+                        onTaxesPriceChange = onTaxesPriceChange,
+                    )
+                }
+
+                // Start game button
+                item {
+                    StartGameButton(
+                        isEnabled = numPlayers > 0,
+                        onClick = onStartGame,
+                        modifier = Modifier.padding(bottom = 0.dp) // No bottom padding needed in landscape
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun ConfigHeader(onExit: () -> Unit) {
@@ -354,28 +462,25 @@ fun PlayerCountSelector(
 
 @Composable
 fun PlayerNameInputs(
-    numPlayers: Int,
-    playerNames: List<String>,
-    onNameChange: (Int, String) -> Unit
+    index: Int,
+    name: String,
+    onNameChange: (String) -> Unit
 ) {
-    for (i in 0 until numPlayers) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.Player) + " ${i + 1}: ",
-                fontSize = 24.sp,
-                modifier = Modifier.width(120.dp)
-            )
-            OutlinedTextField(
-                value = playerNames[i],
-                onValueChange = { onNameChange(i, it) },
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "${stringResource(R.string.Player)} ${index + 1}: ",
+            fontSize = 20.sp,
+            modifier = Modifier.width(100.dp)
+        )
+        OutlinedTextField(
+            value = name,
+            onValueChange = onNameChange,
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
     }
 }
 
@@ -412,7 +517,7 @@ fun TimerConfiguration(
                 onValueChange = { input ->
                     if (input.all { it.isDigit() }) onTimeChange(input)
                 },
-                label = { Text("Time Limit (minutes)") },
+                label = { Text(stringResource(R.string.TimerTimeLimit)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -442,5 +547,140 @@ fun StartGameButton(
         )
     ) {
         Text(text = stringResource(R.string.StartGame), fontSize = 20.sp, color = Color.White)
+    }
+}
+
+@Composable
+fun AdvancedConfiguration(
+    isEnabled: Boolean,
+    startingMoney: String,
+    passGoMoney: String,
+    jailTurns: String,
+    taxesPrice: String,
+    onAdvancedToggle: (Boolean) -> Unit,
+    onStartingMoneyChange: (String) -> Unit,
+    onPassGoMoneyChange: (String) -> Unit,
+    onJailTurnsChange: (String) -> Unit,
+    onTaxesPriceChange: (String) -> Unit,
+) {
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.ActivateAdvancedConfiguration),
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            Checkbox(
+                checked = isEnabled,
+                onCheckedChange = onAdvancedToggle,
+                colors = CheckboxDefaults.colors(checkedColor = Color(0xFF03A9F4))
+            )
+        }
+
+        if (isEnabled) {
+            // Starting money
+            OutlinedTextField(
+                value = startingMoney,
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() }) onStartingMoneyChange(input)
+                },
+                label = { Text(stringResource(id = R.string.StartMoney)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Pass go money
+            OutlinedTextField(
+                value = passGoMoney,
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() }) onPassGoMoneyChange(input)
+                },
+                label = { Text(stringResource(id = R.string.PassGoMoney)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Jail turns
+            OutlinedTextField(
+                value = jailTurns,
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() }) onJailTurnsChange(input)
+                },
+                label = { Text(stringResource(id = R.string.JailTurns)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+
+            // Taxes prices
+            OutlinedTextField(
+                value = taxesPrice,
+                onValueChange = { input ->
+                    if (input.all { it.isDigit() }) onTaxesPriceChange(input)
+                },
+                label = { Text(stringResource(id = R.string.TaxesPrices)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, heightDp = 550, widthDp = 950)
+@Composable
+fun AdvancedConfigPreview() {
+    var numPlayers by remember { mutableIntStateOf(4) }
+    val playerNames = remember { mutableStateListOf("P1", "P2", "P3", "P4") }
+    var timerEnabled by remember { mutableStateOf(true) }
+    var timeText by remember { mutableStateOf("1") }
+
+    var advancedExpanded by remember { mutableStateOf(true) }
+    var startingMoney by remember { mutableStateOf("2000") }
+    var passGoMoney by remember { mutableStateOf("200") }
+    var jailTurns by remember { mutableStateOf("3") }
+    var taxesPrice by remember { mutableStateOf("200") }
+
+    MonopolyTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            ConfigContent(
+                isPortrait = false,
+                numPlayers = numPlayers,
+                playerNames = playerNames,
+                isTimerEnabled = timerEnabled,
+                timeLimitText = timeText,
+                onNumPlayersChange = { numPlayers = it },
+                onPlayerNameChange = { index, name -> playerNames[index] = name },
+                onTimerToggle = { timerEnabled = it },
+                onTimeLimitChange = { timeText = it },
+                onExit = { },
+                onStartGame = {},
+                isAdvancedExpanded = advancedExpanded,
+                startingMoney = startingMoney,
+                passGoMoney = passGoMoney,
+                jailTurns = jailTurns,
+                taxesPrice = taxesPrice,
+                onAdvancedToggle = { advancedExpanded = it },
+                onStartingMoneyChange = { startingMoney = it },
+                onPassGoMoneyChange = { passGoMoney = it },
+                onJailTurnsChange = { jailTurns = it },
+                onTaxesPriceChange = { taxesPrice = it }
+            )
+        }
     }
 }

@@ -34,7 +34,7 @@ class GameControllerTestFor2Players {
             Player(name = "PLAYER 2", id = 1, money = 2000)
         )
 
-        board.generateBoard(2)
+        board.generateBoard(2, 200, 3, 200)
 
         controller = GameController(mockView, board, players, 0, dice)
     }
