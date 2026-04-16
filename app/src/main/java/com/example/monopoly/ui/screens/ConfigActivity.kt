@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -18,8 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,15 +32,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 import com.example.monopoly.ui.theme.MonopolyTheme
+import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
 
 class ConfigActivity : ComponentActivity() {
+    // Use ViewModel to manage state
+    private val viewModel: ConfigActivityViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             MonopolyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ConfigScreen(modifier = Modifier.padding(innerPadding))
+                    ConfigScreen(modifier = Modifier.padding(innerPadding), viewModel = viewModel)
                 }
             }
         }
@@ -52,51 +55,38 @@ class ConfigActivity : ComponentActivity() {
  * Stateful Composable that manages the state for the configuration screen.
  */
 @Composable
-fun ConfigScreen(modifier: Modifier = Modifier) {
+fun ConfigScreen(modifier: Modifier = Modifier, viewModel: ConfigActivityViewModel) {
     val context = LocalContext.current
-    
-    // Use rememberSaveable for basic types
-    var numPlayers by rememberSaveable { mutableIntStateOf(0) }
-    
-    // Custom saver for the SnapshotStateList of player names
-    val playerNames = rememberSaveable(saver = listSaver(
-        save = { it.toList() },
-        restore = { mutableStateListOf(*it.toTypedArray()) }
-    )) { mutableStateListOf("", "", "", "") }
-    
-    var isTimerEnabled by rememberSaveable { mutableStateOf(false) }
-    var timeLimitText by rememberSaveable { mutableStateOf("") }
 
     // Detect orientation
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
     ConfigContent(
         isPortrait = isPortrait,
-        numPlayers = numPlayers,
-        playerNames = playerNames,
-        isTimerEnabled = isTimerEnabled,
-        timeLimitText = timeLimitText,
-        onNumPlayersChange = { numPlayers = it },
-        onPlayerNameChange = { index, name -> playerNames[index] = name },
-        onTimerToggle = { isTimerEnabled = it },
-        onTimeLimitChange = { timeLimitText = it },
+        numPlayers = viewModel.numPlayers,
+        playerNames = viewModel.playerNames,
+        isTimerEnabled = viewModel.isTimerEnabled,
+        timeLimitText = viewModel.timeLimitText,
+        onNumPlayersChange = { viewModel.updateNumPlayers(it) },
+        onPlayerNameChange = { index, name -> viewModel.updatePlayerName(index, name) },
+        onTimerToggle = { viewModel.toggleTimer(it) },
+        onTimeLimitChange = { viewModel.updateTimeLimit(it) },
         onExit = {
             val intent = Intent(context, MainActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             context.startActivity(intent)
         },
         onStartGame = {
-            val selectedNames = playerNames.take(numPlayers)
-            if (selectedNames.any { it.isBlank() }) {
+            if (!viewModel.areAllNamesFilled()) {
                 Toast.makeText(context, "Please enter all player names", Toast.LENGTH_SHORT).show()
             } else {
-                // If is enabled use the time, otherwise no time -> 0
-                val finalTimeLimit = if (isTimerEnabled) timeLimitText.toIntOrNull() ?: 0 else 0
-
                 val intent = Intent(context, GameActivity::class.java).apply {
-                    putExtra("NUM_PLAYERS", numPlayers)
-                    putStringArrayListExtra("PLAYER_NAMES", ArrayList(selectedNames))
-                    putExtra("TIME_LIMIT", finalTimeLimit)
+                    putExtra("NUM_PLAYERS", viewModel.numPlayers)
+                    putStringArrayListExtra(
+                        "PLAYER_NAMES",
+                        ArrayList(viewModel.getSelectedPlayerNames())
+                    )
+                    putExtra("TIME_LIMIT", viewModel.getFinalTimeLimit())
                 }
                 context.startActivity(intent)
             }
