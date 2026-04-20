@@ -94,7 +94,10 @@ class Results : ComponentActivity() {
                             finish()
                         },
                         onExit = {
-                            exitProcess(0)
+                            val intent = Intent(this, MainActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP // Flag to clean the activity stack
+                            startActivity(intent)
+                            finish()
                         },
                         modifier = Modifier.padding(innerPadding)
                     )
@@ -158,9 +161,11 @@ fun ResultsScreenPortrait(
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val screenScrollState = rememberScrollState()
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(screenScrollState)
     ) {
         // Header
         HeaderArea()
@@ -238,6 +243,7 @@ fun ResultsScreenLandscape(
                     .fillMaxHeight()
             ) {
                 EmailArea(emailValue, onEmailChange)
+                Spacer(modifier = Modifier.height(12.dp))
                 ButtonsArea(onSendEmail, onNewGame, onExit)
             }
         }
@@ -253,7 +259,7 @@ fun HeaderArea() {
         textAlign = TextAlign.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     )
 }
 
@@ -317,7 +323,7 @@ fun EmailArea(emailValue: String, onEmailChange: (String) -> Unit) {
         textAlign = TextAlign.Left,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp)
+            .padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
     )
 
     // Email input
@@ -327,7 +333,9 @@ fun EmailArea(emailValue: String, onEmailChange: (String) -> Unit) {
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         label = { Text(stringResource(id = R.string.TextFieldEnterTextEmail)) },
         placeholder = { Text(stringResource(id = R.string.DefaultEmail)) },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
     )
 }
 
@@ -352,7 +360,7 @@ fun ColumnScope.ButtonsArea(onSendEmail: () -> Unit, onNewGame: () -> Unit, onEx
         // Text
         Text(stringResource(R.string.ButtonSendEmail), fontSize = 18.sp)
     }
-    Spacer(modifier = Modifier.height(10.dp))
+    Spacer(modifier = Modifier.height(4.dp))
 
     // New Game button
     Button(
@@ -372,7 +380,7 @@ fun ColumnScope.ButtonsArea(onSendEmail: () -> Unit, onNewGame: () -> Unit, onEx
         // Text
         Text(stringResource(R.string.ButtonNewGame), fontSize = 18.sp)
     }
-    Spacer(modifier = Modifier.height(10.dp))
+    Spacer(modifier = Modifier.height(4.dp))
 
     // Exit button
     Button(
