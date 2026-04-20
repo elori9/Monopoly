@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +39,8 @@ fun BoardArea(
     gameMessage: String,
     centerContent: @Composable () -> Unit // Save space for dices in the middle
 ) {
+    val shouldRotate = true
+
     Column(modifier = Modifier.fillMaxWidth()) {
 
         // Top
@@ -78,7 +82,8 @@ fun BoardArea(
                             .fillMaxHeight(),
                         gameBox = box,
                         playersHere = allPlayers.filter { player -> player.position == box.position },
-                        housesCount = if (box is Property) box.numHouses else 0
+                        housesCount = if (box is Property) box.numHouses else 0,
+                        rotation = if (shouldRotate) 90f else 0f
                     )
                 }
             }
@@ -124,7 +129,8 @@ fun BoardArea(
                             .fillMaxHeight(),
                         gameBox = box,
                         playersHere = allPlayers.filter { player -> player.position == box.position },
-                        housesCount = if (box is Property) box.numHouses else 0
+                        housesCount = if (box is Property) box.numHouses else 0,
+                        rotation = if (shouldRotate) -90f else 0f
                     )
                 }
             }
@@ -161,12 +167,15 @@ fun DrawBox(
     gameBox: GameBox,
     playersHere: List<Player> = emptyList(),
     housesCount: Int = 0,
+    rotation: Float = 0f
 ) {
     val boxIcon = getIconByName(gameBox.name)
 
     // Use of box to use a cape container
     Box(
-        modifier = modifier.border(1.dp, Color.Black)
+        modifier = modifier
+            .rotateBoxContent(rotation)
+            .border(1.dp, Color.Black)
     ) {
         //Background
         Image(
@@ -178,19 +187,44 @@ fun DrawBox(
 
         // Houses (on top)
         if (housesCount > 0) {
-            Row(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
-                    .padding(top = 20.dp, start = 4.dp, end = 4.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                    .padding(top = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                repeat(housesCount) {
-                    Image(
-                        painter = painterResource(id = R.drawable.icon6),
-                        contentDescription = "house",
-                        modifier = Modifier.size(12.dp)
-                    )
+                // Top row: up to 3 houses
+                val topRowCount = if (housesCount > 3) 3 else housesCount
+                if (topRowCount > 0) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        repeat(topRowCount) {
+                            Image(
+                                painter = painterResource(id = R.drawable.icon6),
+                                contentDescription = "house",
+                                modifier = Modifier.size(10.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Bottom row: up to 2 houses
+                val bottomRowCount = housesCount - 3
+                if (bottomRowCount > 0) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        repeat(bottomRowCount) {
+                            Image(
+                                painter = painterResource(id = R.drawable.icon6),
+                                contentDescription = "house",
+                                modifier = Modifier.size(10.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -327,3 +361,29 @@ fun DrawBoxesPreview() {
         )
     }
 }
+
+fun Modifier.rotateBoxContent(rotation: Float) = this.then(
+    if (rotation == 90f || rotation == 270f || rotation == -90f) {
+        Modifier.layout { measurable, constraints ->
+            val swappedConstraints = constraints.copy(
+                minWidth = constraints.minHeight,
+                maxWidth = constraints.maxHeight,
+                minHeight = constraints.minWidth,
+                maxHeight = constraints.maxWidth
+            )
+            val placeable = measurable.measure(swappedConstraints)
+            layout(placeable.height, placeable.width) {
+                placeable.place(
+                    x = (placeable.height - placeable.width) / 2,
+                    y = (placeable.width - placeable.height) / 2
+                )
+            }
+        }.graphicsLayer {
+            rotationZ = rotation
+        }
+    } else {
+        Modifier.graphicsLayer {
+            rotationZ = rotation
+        }
+    }
+)
