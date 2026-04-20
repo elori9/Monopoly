@@ -6,6 +6,7 @@ import android.icu.util.Calendar
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 import com.example.monopoly.ui.screens.ui.theme.MonopolyTheme
+import com.example.monopoly.ui.viewmodel.ResultsViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlin.system.exitProcess
@@ -58,6 +60,8 @@ import androidx.core.net.toUri
 import androidx.compose.material3.Icon
 
 class Results : ComponentActivity() {
+    private val viewModel: ResultsViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val gameInfo = intent?.getStringExtra("INFO") ?: "No game log"
@@ -67,21 +71,17 @@ class Results : ComponentActivity() {
         val date = formatter.format(calendar.time)
 
         setContent {
-            var emailState by rememberSaveable {
-                mutableStateOf("")
-            }
-
             MonopolyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     ResultsScreen(
                         logInfo = gameInfo,
                         date = date,
-                        emailValue = emailState,
-                        onEmailChange = { emailState = it },
+                        emailValue = viewModel.email,
+                        onEmailChange = { viewModel.updateEmail(it) },
                         onSendEmail = {
                             val intent = Intent(Intent.ACTION_SENDTO).apply {
                                 data = "mailto:".toUri()
-                                putExtra(Intent.EXTRA_EMAIL, arrayOf(emailState))
+                                putExtra(Intent.EXTRA_EMAIL, arrayOf(viewModel.email))
                                 putExtra(Intent.EXTRA_SUBJECT, "Log Monopoly - $date")
                                 putExtra(Intent.EXTRA_TEXT, gameInfo)
                             }
