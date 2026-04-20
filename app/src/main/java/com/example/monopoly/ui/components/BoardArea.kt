@@ -180,15 +180,16 @@ fun DrawBox(
         if (housesCount > 0) {
             Row(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .align(Alignment.TopCenter)
-                    .padding(top = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(top = 20.dp, start = 4.dp, end = 4.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 repeat(housesCount) {
                     Image(
                         painter = painterResource(id = R.drawable.icon6),
                         contentDescription = "house",
-                        modifier = Modifier.size(15.dp)
+                        modifier = Modifier.size(12.dp)
                     )
                 }
             }
