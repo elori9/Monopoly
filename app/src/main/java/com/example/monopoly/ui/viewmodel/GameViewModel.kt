@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.neverEqualPolicy
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
@@ -56,10 +57,16 @@ class GameViewModel(
             generateBoard(numPlayers, passGoMoney, jailTurns, taxPrice)
         }
     private val boxesPerSide = board.size / 4
-    val bottomBoxes = board.gameBoxes.subList(0, boxesPerSide + 1).reversed()
-    val leftBoxes = board.gameBoxes.subList(boxesPerSide + 1, (boxesPerSide * 2))
-    val topBoxes = board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1)
-    val rightBoxes = board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size)
+
+    // neverEqualPolicy() forces Compose to re-render the board when the list is reassigned.
+    var bottomBoxes by mutableStateOf(board.gameBoxes.subList(0, boxesPerSide + 1).reversed().toList(), neverEqualPolicy())
+        private set
+    var leftBoxes by mutableStateOf(board.gameBoxes.subList(boxesPerSide + 1, (boxesPerSide * 2)).toList(), neverEqualPolicy())
+        private set
+    var topBoxes by mutableStateOf(board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1).toList(), neverEqualPolicy())
+        private set
+    var rightBoxes by mutableStateOf(board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size).toList(), neverEqualPolicy())
+        private set
 
     // Those will be the callbacks
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
@@ -98,7 +105,8 @@ class GameViewModel(
         // Start the controller
         controller = GameController(
             view = this,
-            board = Board().apply { generateBoard(numPlayers, passGoMoney, jailTurns, taxPrice) },
+            // IMPORTANT: Use the shared 'board' instance to keep the UI in sync.
+            board = board,
             players = players,
             timeLimit = initialMinutes,
             dice = Dice()
@@ -166,6 +174,11 @@ class GameViewModel(
 
         gameMessage = parsedText
         addLog(parsedText)
+
+        // Trigger board recomposition for visual changes like houses
+        if (type == MessageType.HOUSE_BUILT || type == MessageType.PROPERTY_BOUGHT) {
+            triggerBoardRecomposition()
+        }
     }
 
     override fun showTurnOptions(
@@ -229,13 +242,23 @@ class GameViewModel(
     }
 
     override fun updatePropertyOwner(playerId: Int, position: Int) {
-        // No need
+        triggerBoardRecomposition()
     }
 
     override fun showEndTurnButton(onEndTurn: () -> Unit) {
         endTurnAction = onEndTurn
     }
 
+
+    /**
+     * Forces Compose to re-render the board when an internal property changes (e.g. houses).
+     */
+    private fun triggerBoardRecomposition() {
+        bottomBoxes = bottomBoxes.toList()
+        leftBoxes = leftBoxes.toList()
+        topBoxes = topBoxes.toList()
+        rightBoxes = rightBoxes.toList()
+    }
 
     /**
      * This functions does nothing, just calls compose to recompose the screen (for updating money and position)
