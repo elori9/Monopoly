@@ -20,6 +20,7 @@ import game.model.Player
 import game.model.TurnAction
 import game.model.box.Property
 import game.model.Dice
+import game.model.MessageType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -149,8 +150,22 @@ class GameViewModel(
 
     // Implementation of the interface
 
-    override fun showMessage(message: String) {
-        gameMessage = message
+    override fun showMessage(type: MessageType, extraInfo: String?) {
+        val context = getApplication<Application>()
+
+        val parsedText = when (type) {
+            MessageType.RENT_PAID -> context.getString(R.string.MsgRentPaid, extraInfo)
+            MessageType.PROPERTY_BOUGHT -> context.getString(R.string.MsgPropertyBought, extraInfo)
+            MessageType.CROSS_START -> context.getString(R.string.MsgCrossStart, extraInfo)
+            MessageType.FEE_PAID -> context.getString(R.string.MsgFeePaid)
+            MessageType.GO_TO_JAIL -> context.getString(R.string.MsgGoToJail)
+            MessageType.HOUSE_BUILT -> context.getString(R.string.MsgHouseBuilt, extraInfo)
+            MessageType.BUILD_CANCELED -> context.getString(R.string.MsgBuildCanceled)
+            MessageType.GENERIC -> extraInfo ?: ""
+        }
+
+        gameMessage = parsedText
+        addLog(parsedText)
     }
 
     override fun showTurnOptions(

@@ -1,5 +1,6 @@
 package game.interfaces
 
+import game.model.MessageType
 import game.model.Player
 import game.model.TurnAction
 import game.model.box.Property
@@ -11,10 +12,11 @@ import game.model.box.Property
 interface GameView {
 
     /**
-     * Show a message
-     * @param message the message
+     * Show a message (non win, no dice roll and no bankrupt)
+     * @param MessageType the type of message
+     * @param extraInfo extra info
      */
-    fun showMessage(message: String)
+    fun showMessage(type: MessageType, extraInfo: String? = null)
 
     /**
      * Show options on the start
