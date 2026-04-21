@@ -36,7 +36,7 @@ import com.example.monopoly.ui.theme.MonopolyTheme
 import coil.compose.AsyncImage
 
 object Constants {
-    const val GITHUB_LINK = "https://github.com/"
+    const val GITHUB_LINK = "https://github.com/elori9/Monopoly"
 }
 
 class HelpActivity : ComponentActivity() {
