@@ -3,6 +3,7 @@ package game.controller
 import game.interfaces.GameView
 import game.model.Board
 import game.model.Dice
+import game.model.MessageType
 import game.model.Player
 import game.model.TurnAction
 import game.model.box.*
@@ -29,7 +30,7 @@ class GameController(
     fun startGame() {
         onGame = true
         startTime = System.currentTimeMillis()
-        view.showMessage("Starting with ${players.size} and $timeLimit")
+        view.showMessage(MessageType.GENERIC, "${players.size} / $timeLimit")
         nextTurn()
     }
 
@@ -108,7 +109,7 @@ class GameController(
             if (startBox is Start) {
                 startBox.action(currentPlayer)
                 view.updatePlayerMoney(currentPlayer.id, currentPlayer.money)
-                view.showMessage("You cross start, Get 200€")
+                view.showMessage(MessageType.CROSS_START)
             }
         }
 
@@ -140,7 +141,7 @@ class GameController(
             it.numHouses < 5 && currentPlayer.money >= it.housePrice
         }
         if (canBuild.isEmpty()) {
-            view.showMessage("${currentPlayer.name} can't build")
+            view.showMessage(MessageType.BUILD_CANCELED,currentPlayer.name)
             // Ask for his turn, as he didn't roll the dices
             nextTurn()
             return
@@ -152,11 +153,11 @@ class GameController(
 
                 // Put the house on the board and update the money on the board
                 view.updatePlayerMoney(currentPlayer.id, currentPlayer.money)
-                view.showMessage("¡House built in ${selectedProperty.name}")
+                view.showMessage(MessageType.HOUSE_BUILT,selectedProperty.name)
                 // Ask for his turn, as he didn't roll the dices
                 nextTurn()
             } else {
-                view.showMessage("Build canceled")
+                view.showMessage(MessageType.BUILD_CANCELED)
                 // Ask for his turn, as he didn't roll the dices
                 nextTurn()
             }
@@ -177,7 +178,7 @@ class GameController(
                             // Update on gui
                             view.updatePlayerMoney(player.id, player.money)
                             view.updatePropertyOwner(player.id, player.position)
-                            view.showMessage("You bought ${gameBox.name}")
+                            view.showMessage(MessageType.PROPERTY_BOUGHT,gameBox.name)
                         }
                         // End the turn
                         endTurnAndPass()
@@ -198,7 +199,7 @@ class GameController(
                     if (gameBox.owner != player) {
                         // Use !! bc owner can't be null on this point
                         view.updatePlayerMoney(gameBox.owner!!.id, gameBox.owner!!.money)
-                        view.showMessage("You got paid for the rent of ${gameBox.name}")
+                        view.showMessage(MessageType.RENT_PAID,gameBox.name)
                     }
 
                     // End the turn
@@ -209,7 +210,7 @@ class GameController(
             is Fee -> {
                 gameBox.action(player)
                 view.updatePlayerMoney(player.id, player.money)
-                view.showMessage("You paid a fee")
+                view.showMessage(MessageType.FEE_PAID)
 
                 // Check if player broke
                 if (player.broke) {
@@ -222,7 +223,7 @@ class GameController(
 
             is Card -> {
                 val result = gameBox.action(player)
-                view.showMessage(result)
+                view.showMessage(MessageType.GENERIC, result)
 
                 if (result.contains("€")) {
                     // Show the money update
@@ -247,14 +248,14 @@ class GameController(
 
             is Jail -> {
                 gameBox.action(player)
-                view.showMessage("You go to the jail")
+                view.showMessage(MessageType.GO_TO_JAIL)
 
                 // End the turn
                 endTurnAndPass()
             }
 
             is Start -> {
-                view.showMessage("You got the start money")
+                view.showMessage(MessageType.CROSS_START)
 
                 // End the turn
                 endTurnAndPass()

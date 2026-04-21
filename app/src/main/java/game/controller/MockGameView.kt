@@ -1,6 +1,7 @@
 package game.controller
 
 import game.interfaces.GameView
+import game.model.MessageType
 import game.model.Player
 import game.model.TurnAction
 import game.model.box.Property
@@ -24,9 +25,10 @@ class MockGameView : GameView {
     var propertyToBuild: Property? = null
 
 
-    override fun showMessage(message: String) {
-        lastMessage = message
-        println("GUI: $message")
+    override fun showMessage(type: MessageType, extraInfo: String?)
+    {
+        lastMessage = extraInfo ?: ""
+        println("GUI: $lastMessage")
     }
 
     override fun showDiceRoll(playerName: String, roll: Int) {
