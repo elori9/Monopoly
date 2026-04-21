@@ -5,19 +5,17 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.media.SoundPool
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.monopoly.R
@@ -25,21 +23,14 @@ import com.example.monopoly.ui.components.*
 import com.example.monopoly.ui.components.animations.RollDice
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.GameViewModel
-import game.controller.GameController
-import game.model.Board
-import game.model.Dice
+import com.example.monopoly.ui.viewmodel.GameViewModelFactory
 import game.model.Player
-import game.model.TurnAction
 import game.model.box.BoxName
 import game.model.box.GameBox
-import kotlinx.coroutines.delay
-import kotlin.invoke
 
 class GameActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
+    val viewModel: GameViewModel by viewModels {
+        // Get the intent there for pass to the view model
         val numPlayers = intent?.getIntExtra("NUM_PLAYERS", 2) ?: 2
         val playerNames = intent?.getStringArrayListExtra("PLAYER_NAMES") ?: arrayListOf()
         val timerMinutes = intent?.getIntExtra("TIME_LIMIT", 0) ?: 0
@@ -48,17 +39,27 @@ class GameActivity : ComponentActivity() {
         val jailTurns = intent?.getIntExtra("JAIL_TURNS", 3) ?: 3
         val taxPrice = intent?.getIntExtra("TAX_PRICE", 200) ?: 200
 
+        GameViewModelFactory(
+            application = application,
+            numPlayers = numPlayers,
+            playerNames = playerNames,
+            initialMinutes = timerMinutes,
+            startMoney = startMoney,
+            passGoMoney = passGoMoney,
+            jailTurns = jailTurns,
+            taxPrice = taxPrice
+        )
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
         setContent {
             MonopolyTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     GameScreen(
-                        numPlayers = numPlayers,
-                        startMoney = startMoney,
-                        passGoMoney = passGoMoney,
-                        jailTurns = jailTurns,
-                        taxPrice = taxPrice,
-                        playerNames = playerNames,
-                        initialMinutes = timerMinutes,
+                        viewModel = viewModel,
                         onExit = {
                             val intent = Intent(this, MainActivity::class.java)
                             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -79,46 +80,11 @@ class GameActivity : ComponentActivity() {
  */
 @Composable
 fun GameScreen(
-    numPlayers: Int,
-    startMoney: Int,
-    passGoMoney: Int,
-    jailTurns: Int,
-    taxPrice: Int,
-    playerNames: List<String>,
-    initialMinutes: Int,
+    viewModel: GameViewModel,
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-
-    // 1. Manage Model State
-    val board = remember(numPlayers) {
-        Board().apply { generateBoard(numPlayers, passGoMoney, jailTurns, taxPrice) }
-    }
-
-    val viewModel = remember { GameViewModel() }
-
-    val controller = remember(board) {
-        val players = playerNames.mapIndexed { index, name ->
-            Player(id = index, name = name, money = startMoney)
-        }
-        viewModel.playersState.addAll(players)
-
-        GameController(
-            view = viewModel,
-            board = board,
-            players = players,
-            timeLimit = initialMinutes,
-            dice = Dice()
-        )
-    }
-
-    // 2. Prepare data for components (Splitting board boxes)
-    val boxesPerSide = board.size / 4
-    val bottomBoxes = board.gameBoxes.subList(0, boxesPerSide + 1).reversed()
-    val leftBoxes = board.gameBoxes.subList(boxesPerSide + 1, (boxesPerSide * 2))
-    val topBoxes = board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1)
-    val rightBoxes = board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size)
 
     val currentOwnedIcons =
         remember(viewModel.currentPlayer, viewModel.currentPlayer?.properties?.size) {
@@ -127,31 +93,8 @@ fun GameScreen(
             } ?: emptyList()
         }
 
-    // 3. Log variables
-    val logBuilder = remember { StringBuilder() }
 
-    // 4. Manage UI State (Timer)
-    var secondsRemaining by rememberSaveable(initialMinutes) {
-        mutableLongStateOf(initialMinutes.toLong() * 60L)
-    }
-
-    if (initialMinutes > 0 && viewModel.winner == null) {
-        LaunchedEffect(Unit) {
-            while (secondsRemaining > 0) {
-                delay(1000L)
-                secondsRemaining--
-            }
-
-            // Time over
-            if (secondsRemaining == 0L && viewModel.winner == null) {
-                logBuilder.appendLine(context.getString(R.string.LogTimeOver))
-                // Advertise the controller
-                controller.endGame()
-            }
-        }
-    }
-
-    // 5. Add sounds
+    // Add sounds
 
     // Sound manager
     val soundPool = remember { SoundPool.Builder().build() }
@@ -160,7 +103,6 @@ fun GameScreen(
     val diceSoundId = remember { soundPool.load(context, R.raw.diceroll, 1) }
     val cashId = remember { soundPool.load(context, R.raw.cash, 1) }
 
-
     // Clean memory on exit as the mp3 are loaded on RAM since start of screen on sound pool
     DisposableEffect(Unit) {
         onDispose {
@@ -168,51 +110,29 @@ fun GameScreen(
         }
     }
 
+
     val isPortrait = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
 
 
-    // 6. Throw the launcher for logs
-    LaunchedEffect(Unit) {
-        // Logs
-        logBuilder.appendLine(context.getString(R.string.LogTittle))
-        logBuilder.appendLine(context.getString(R.string.LogNumPlayers) + numPlayers)
-        logBuilder.appendLine(
-            context.getString(R.string.LogNamePlayers) + playerNames.joinToString(
-                separator = ", "
-            )
-        )
-        logBuilder.appendLine(
-            if (initialMinutes > 0) context.getString(R.string.LogTimerOn) + initialMinutes
-            else context.getString(R.string.LogTimeOff)
-        )
-
-        // Controller
-        controller.startGame()
-    }
-
-    // 7. Throw a launcher for check if someone win for non-endtime
+    // Send the end message if is a winner
     LaunchedEffect(viewModel.winner) {
-        val winner = viewModel.winner
-        if (winner != null) {
-            // Add log
-            logBuilder.appendLine("${context.getString(R.string.LogWinner)} ${winner.name}")
-
+        if (viewModel.winner != null) {
             // Send log
-            sendEndGameLog(context, logBuilder.toString())
+            sendEndGameLog(context, viewModel.logBuilder)
         }
     }
 
 
-    // 8. Delegate to Stateless Content
+    // Delegate to Stateless Content
     GameContent(
         isPortrait = isPortrait,
-        initialMinutes = initialMinutes,
-        secondsRemaining = secondsRemaining,
+        initialMinutes = viewModel.initialMinutes,
+        secondsRemaining = viewModel.secondsRemaining,
         onExit = onExit,
-        topGameBoxes = topBoxes,
-        bottomGameBoxes = bottomBoxes,
-        leftGameBoxes = leftBoxes,
-        rightGameBoxes = rightBoxes,
+        topGameBoxes = viewModel.topBoxes,
+        bottomGameBoxes = viewModel.bottomBoxes,
+        leftGameBoxes = viewModel.leftBoxes,
+        rightGameBoxes = viewModel.rightBoxes,
         allPlayers = viewModel.playersState,
         currentPlayerName = viewModel.currentPlayer?.name ?: "",
         currentPlayerId = viewModel.currentPlayer?.id ?: 0,
@@ -220,34 +140,25 @@ fun GameScreen(
         ownedPropertyIcons = currentOwnedIcons,
         gameMessage = viewModel.gameMessage,
         onBuyProperty = {
-            val action = viewModel.buyProperty
             soundPool.play(cashId, 1f, 1f, 0, 0, 1f)
-            viewModel.buyProperty = null
-            action?.invoke(true)
+            viewModel.onBuyPropertyDecision(true)
         },
         onBuyHouse = {
-            val action = viewModel.turnAction
-            viewModel.turnAction = null
-            action?.invoke(TurnAction.BUILD_HOUSE)
+            viewModel.onBuyHouseClicked()
         },
         onNextTurn = {
-            // End turn
-            val action = viewModel.endTurnAction
-            viewModel.endTurnAction = null // Clean for deactivate the button
-            action?.invoke()
+            viewModel.onNextTurnClicked()
         },
         onRollDice = {
             // Play sound and roll
-            val action = viewModel.turnAction
-            viewModel.turnAction = null
             soundPool.play(diceSoundId, 1f, 1f, 0, 0, 1f)
-            action?.invoke(TurnAction.ROLL_DICE)
+            viewModel.onRollDiceClicked()
         },
-        canBuyProperty = viewModel.buyProperty != null,
-        canBuyHouse = viewModel.turnAction != null,
-        canNextTurn = viewModel.endTurnAction != null,
+        canBuyProperty = viewModel.canBuyProperty,
+        canBuyHouse = viewModel.canBuyHouse,
+        canNextTurn = viewModel.canNextTurn,
         currentDiceRoll = viewModel.dice,
-        canRoll = viewModel.turnAction != null,
+        canRoll = viewModel.canRoll,
         modifier = modifier
     )
 }
@@ -577,19 +488,43 @@ private fun sendEndGameLog(context: Context, info: String) {
     context.startActivity(intent)
 }
 
-@Preview(showBackground = true, widthDp = 600, heightDp = 250)
+@Preview(showBackground = true, widthDp = 800, heightDp = 400)
 @Composable
 fun GameScreenLandscapePreview() {
     MonopolyTheme {
-        GameScreen(
-            numPlayers = 2,
-            startMoney = 2000,
-            passGoMoney = 200,
-            jailTurns = 3,
-            taxPrice = 200,
-            playerNames = listOf("Player 1", "Player 2"),
+
+        GameContent(
+            isPortrait = false,
             initialMinutes = 60,
-            onExit = {}
+            secondsRemaining = 3600L,
+            onExit = {},
+
+            topGameBoxes = emptyList(),
+            bottomGameBoxes = emptyList(),
+            leftGameBoxes = emptyList(),
+            rightGameBoxes = emptyList(),
+
+            allPlayers = listOf(
+                Player(id = 0, name = "p1", money = 1500),
+                Player(id = 1, name = "p2", money = 2000)
+            ),
+            currentPlayerName = "p1",
+            currentPlayerId = 0,
+            currentPlayerMoney = 1500,
+
+            ownedPropertyIcons = listOf(R.drawable.tomatotown, R.drawable.park),
+
+            gameMessage = "msg",
+            onBuyProperty = {},
+            onBuyHouse = {},
+            onNextTurn = {},
+            onRollDice = {},
+
+            canBuyProperty = false,
+            canBuyHouse = true,
+            canNextTurn = false,
+            canRoll = true,
+            currentDiceRoll = 4
         )
     }
 }

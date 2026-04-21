@@ -1,19 +1,40 @@
 package com.example.monopoly.ui.viewmodel
 
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.example.monopoly.R
+import game.controller.GameController
 import game.interfaces.GameView
+import game.model.Board
 import game.model.Player
 import game.model.TurnAction
 import game.model.box.Property
+import game.model.Dice
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
-class GameViewModel : GameView {
+class GameViewModel(
+    application: Application,
+    private val numPlayers: Int,
+    private val playerNames: List<String>,
+    val initialMinutes: Int,
+    private val startMoney: Int,
+    private val passGoMoney: Int,
+    private val jailTurns: Int,
+    private val taxPrice: Int
+) : GameView, AndroidViewModel(application) {
+
     // State vars
     val playersState = mutableStateListOf<Player>()
     var currentPlayerMoney by mutableIntStateOf(0)
@@ -22,12 +43,111 @@ class GameViewModel : GameView {
     var currentPlayer by mutableStateOf<Player?>(null)
     var winner by mutableStateOf<Player?>(null)
         private set
+    var logBuilder by mutableStateOf("")
+        private set
+    var secondsRemaining by mutableLongStateOf(initialMinutes.toLong() * 60L)
+        private set
+
+
+    // Board calculations
+    private val board =
+        Board().apply {
+            generateBoard(numPlayers, passGoMoney, jailTurns, taxPrice)
+        }
+    private val boxesPerSide = board.size / 4
+    val bottomBoxes = board.gameBoxes.subList(0, boxesPerSide + 1).reversed()
+    val leftBoxes = board.gameBoxes.subList(boxesPerSide + 1, (boxesPerSide * 2))
+    val topBoxes = board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1)
+    val rightBoxes = board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size)
 
     // Those will be the callbacks
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
     var buyProperty: ((Boolean) -> Unit)? by mutableStateOf(null)
     var endTurnAction: (() -> Unit)? by mutableStateOf(null)
 
+
+    // Flags for buttons activation
+    val canRoll get() = turnAction != null
+    val canBuyProperty get() = buyProperty != null
+    val canNextTurn get() = endTurnAction != null
+    val canBuyHouse get() = turnAction != null
+
+
+    // Controller
+    private val controller: GameController
+
+    // Initialization for the game
+    init {
+        // Add the players
+        val players = playerNames.mapIndexed { index, name ->
+            Player(id = index, name = name, money = startMoney)
+        }
+        playersState.addAll(players)
+
+        // Start the log
+        val context = getApplication<Application>()
+        addLog(context.getString(R.string.LogTittle))
+        addLog("${context.getString(R.string.LogNumPlayers)} $numPlayers")
+        addLog("${context.getString(R.string.LogNamePlayers)} ${playerNames.joinToString(", ")}")
+        addLog(
+            if (initialMinutes > 0) "${context.getString(R.string.LogTimerOn)} $initialMinutes"
+            else context.getString(R.string.LogTimeOff)
+        )
+
+        // Start the controller
+        controller = GameController(
+            view = this,
+            board = Board().apply { generateBoard(numPlayers, passGoMoney, jailTurns, taxPrice) },
+            players = players,
+            timeLimit = initialMinutes,
+            dice = Dice()
+        )
+        // Start the game
+        controller.startGame()
+
+        // Time logic
+        if (initialMinutes > 0 && winner == null) {
+            // Use scope launch to start the timer as need to be on another thread
+            viewModelScope.launch {
+                while (secondsRemaining > 0) {
+                    delay(1000L)
+                    secondsRemaining--
+                }
+            }
+
+            // Time over
+            if (secondsRemaining == 0L && winner == null) {
+                addLog(context.getString(R.string.LogTimerOn))
+                controller.endGame()
+            }
+        }
+    }
+
+
+    // Click events
+    fun onRollDiceClicked() {
+        val callback = turnAction
+        turnAction = null
+        callback?.invoke(TurnAction.ROLL_DICE)
+    }
+    fun onBuyHouseClicked() {
+        val callback = turnAction
+        turnAction = null
+        callback?.invoke(TurnAction.BUILD_HOUSE)
+    }
+    fun onBuyPropertyDecision(buy: Boolean) {
+        val callback = buyProperty
+        buyProperty = null
+        callback?.invoke(buy)
+    }
+    fun onNextTurnClicked() {
+        val callback = endTurnAction
+        endTurnAction = null
+        callback?.invoke()
+    }
+
+
+    // Implementation of the interface
 
     override fun showMessage(message: String) {
         gameMessage = message
@@ -43,7 +163,8 @@ class GameViewModel : GameView {
     }
 
     override fun showDiceRoll(playerName: String, roll: Int) {
-        gameMessage = "$playerName roll $roll"
+        val context = getApplication<Application>()
+        gameMessage = context.getString(R.string.ShowDiceRollMessage, playerName, roll)
         dice = roll
     }
 
@@ -59,7 +180,8 @@ class GameViewModel : GameView {
     }
 
     override fun showBankrupt(playerName: String) {
-        gameMessage = "$playerName bankrupt"
+        val context = getApplication<Application>()
+        gameMessage = context.getString(R.string.ShowBankruptMessage, playerName)
     }
 
     override fun askToBuyProperty(
@@ -84,9 +206,11 @@ class GameViewModel : GameView {
         }
     }
 
-    override fun showGameOver(winner: Player){
+    override fun showGameOver(winner: Player) {
+        val context = getApplication<Application>()
         this.winner = winner
-        gameMessage = "${winner.name} winn"
+        gameMessage = context.getString(R.string.WinnerShowMessage, winner.name)
+        addLog("${context.getString(R.string.LogWinner)} ${winner.name}")
     }
 
     override fun updatePropertyOwner(playerId: Int, position: Int) {
@@ -106,5 +230,41 @@ class GameViewModel : GameView {
         if (index != -1) {
             playersState[index] = playersState[index]
         }
+    }
+
+    /**
+     * Builds the log
+     */
+    private fun addLog(message: String) {
+        logBuilder += "$message\n"
+    }
+}
+
+// Create the factory as the view has dependency
+class GameViewModelFactory(
+    private val application: Application,
+    private val numPlayers: Int,
+    private val playerNames: List<String>,
+    private val initialMinutes: Int,
+    private val startMoney: Int,
+    private val passGoMoney: Int,
+    private val jailTurns: Int,
+    private val taxPrice: Int
+) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(GameViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return GameViewModel(
+                application,
+                numPlayers,
+                playerNames,
+                initialMinutes,
+                startMoney,
+                passGoMoney,
+                jailTurns,
+                taxPrice
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

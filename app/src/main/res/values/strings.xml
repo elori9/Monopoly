@@ -66,5 +66,7 @@
     <string name="JailTurns">Add the amount of turns to jail</string>
     <string name="TaxesPrices">Add the amount of taxes price</string>
     <string name="TimerTimeLimit">Time Limit (minutes)</string>
-
+    <string name="WinnerShowMessage">%1$s wins the game</string>
+    <string name="ShowBankruptMessage">Player %1$s got bankrupt</string>
+    <string name="ShowDiceRollMessage">%1$s rolled a %2$d</string>
 </resources>
