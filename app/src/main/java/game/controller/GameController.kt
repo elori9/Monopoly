@@ -30,7 +30,7 @@ class GameController(
     fun startGame() {
         onGame = true
         startTime = System.currentTimeMillis()
-        view.showMessage(MessageType.GENERIC, "${players.size} / $timeLimit")
+        view.showMessage(MessageType.START_GAME)
         nextTurn()
     }
 
@@ -59,7 +59,8 @@ class GameController(
 
         // Skip turn for broke players automatically
         if (currentPlayer.broke) {
-            endTurnAndPass()
+            turn = (turn + 1) % players.size
+            nextTurn()
             return
         }
 
@@ -141,7 +142,7 @@ class GameController(
             it.numHouses < 5 && currentPlayer.money >= it.housePrice
         }
         if (canBuild.isEmpty()) {
-            view.showMessage(MessageType.BUILD_CANCELED,currentPlayer.name)
+            view.showMessage(MessageType.BUILD_CANCELED, currentPlayer.name)
             // Ask for his turn, as he didn't roll the dices
             nextTurn()
             return
@@ -153,11 +154,11 @@ class GameController(
 
                 // Put the house on the board and update the money on the board
                 view.updatePlayerMoney(currentPlayer.id, currentPlayer.money)
-                view.showMessage(MessageType.HOUSE_BUILT,selectedProperty.name)
+                view.showMessage(MessageType.HOUSE_BUILT, currentPlayer.name, selectedProperty.name)
                 // Ask for his turn, as he didn't roll the dices
                 nextTurn()
             } else {
-                view.showMessage(MessageType.BUILD_CANCELED)
+                view.showMessage(MessageType.BUILD_CANCELED, currentPlayer.name)
                 // Ask for his turn, as he didn't roll the dices
                 nextTurn()
             }
@@ -172,13 +173,17 @@ class GameController(
                     // Ask to buy on
                     view.askToBuyProperty(gameBox, player) { buy ->
                         if (buy) {
-                            // Buy it
-                            player.buyProperty(gameBox)
+                            if (player.money >= gameBox.price) {
+                                // Buy it
+                                player.buyProperty(gameBox)
 
-                            // Update on gui
-                            view.updatePlayerMoney(player.id, player.money)
-                            view.updatePropertyOwner(player.id, player.position)
-                            view.showMessage(MessageType.PROPERTY_BOUGHT,gameBox.name)
+                                // Update on gui
+                                view.updatePlayerMoney(player.id, player.money)
+                                view.updatePropertyOwner(player.id, player.position)
+                                view.showMessage(MessageType.PROPERTY_BOUGHT, player.name, gameBox.name)
+                            } else {
+                                view.showMessage(MessageType.CANT_BUY_PROP, player.name)
+                            }
                         }
                         // End the turn
                         endTurnAndPass()
@@ -199,7 +204,7 @@ class GameController(
                     if (gameBox.owner != player) {
                         // Use !! bc owner can't be null on this point
                         view.updatePlayerMoney(gameBox.owner!!.id, gameBox.owner!!.money)
-                        view.showMessage(MessageType.RENT_PAID,gameBox.name)
+                        view.showMessage(MessageType.RENT_PAID, player.name, gameBox.name)
                     }
 
                     // End the turn
@@ -210,7 +215,7 @@ class GameController(
             is Fee -> {
                 gameBox.action(player)
                 view.updatePlayerMoney(player.id, player.money)
-                view.showMessage(MessageType.FEE_PAID)
+                view.showMessage(MessageType.FEE_PAID, player.name)
 
                 // Check if player broke
                 if (player.broke) {
@@ -223,7 +228,7 @@ class GameController(
 
             is Card -> {
                 val result = gameBox.action(player)
-                view.showMessage(MessageType.GENERIC, result)
+                view.showMessage(MessageType.CARD, player.name, result)
 
                 if (result.contains("€")) {
                     // Show the money update
@@ -248,14 +253,14 @@ class GameController(
 
             is Jail -> {
                 gameBox.action(player)
-                view.showMessage(MessageType.GO_TO_JAIL)
+                view.showMessage(MessageType.GO_TO_JAIL, player.name)
 
                 // End the turn
                 endTurnAndPass()
             }
 
             is Start -> {
-                view.showMessage(MessageType.CROSS_START)
+                view.showMessage(MessageType.CROSS_START, player.name)
 
                 // End the turn
                 endTurnAndPass()

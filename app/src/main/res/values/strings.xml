@@ -69,11 +69,14 @@
     <string name="WinnerShowMessage">%1$s wins the game</string>
     <string name="ShowBankruptMessage">Player %1$s got bankrupt</string>
     <string name="ShowDiceRollMessage">%1$s rolled a %2$d</string>
-    <string name="MsgRentPaid">You got paid for the rent of %1$s</string>
-    <string name="MsgPropertyBought">You bought %1$s</string>
-    <string name="MsgCrossStart">You cross start, get %1$s€</string>
-    <string name="MsgFeePaid">You paid a fee</string>
-    <string name="MsgGoToJail">You go to the jail</string>
-    <string name="MsgHouseBuilt">House built in %1$s</string>
-    <string name="MsgBuildCanceled">Build canceled</string>
+    <string name="MsgRentPaid">%1$s got paid for the rent of %2$s</string>
+    <string name="MsgPropertyBought">%1$s bought %2$s</string>
+    <string name="MsgCrossStart">%1$s cross start, get %2$s€</string>
+    <string name="MsgFeePaid">%1$s paid a fee</string>
+    <string name="MsgGoToJail">%1$s go to the jail</string>
+    <string name="MsgHouseBuilt">%1$s built a house in %2$s</string>
+    <string name="MsgBuildCanceled">%1$s cannot afford the house, build canceled</string>
+    <string name="MsgCantAffordProperty">%1$s cannot afford the property, press next turn</string>
+    <string name="MsgCardAction">%1$s take a card, result: %2$s</string>
+    <string name="MsgStartGame">The game started, P1 can start rolling dices</string>
 </resources>

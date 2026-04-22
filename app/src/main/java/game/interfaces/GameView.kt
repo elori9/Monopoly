@@ -16,7 +16,7 @@ interface GameView {
      * @param MessageType the type of message
      * @param extraInfo extra info
      */
-    fun showMessage(type: MessageType, extraInfo: String? = null)
+    fun showMessage(type: MessageType, vararg extraInfo: String)
 
     /**
      * Show options on the start

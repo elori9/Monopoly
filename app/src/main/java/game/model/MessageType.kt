@@ -8,5 +8,8 @@ enum class MessageType {
     GO_TO_JAIL,
     HOUSE_BUILT,
     BUILD_CANCELED,
+    CANT_BUY_PROP,
+    CARD,
+    START_GAME,
     GENERIC
 }

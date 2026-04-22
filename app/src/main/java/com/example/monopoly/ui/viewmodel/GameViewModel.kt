@@ -1,6 +1,7 @@
 package com.example.monopoly.ui.viewmodel
 
 
+import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -122,12 +123,12 @@ class GameViewModel(
                     delay(1000L)
                     secondsRemaining--
                 }
-            }
 
-            // Time over
-            if (secondsRemaining == 0L && winner == null) {
-                addLog(context.getString(R.string.LogTimerOn))
-                controller.endGame()
+                // Time over
+                if (secondsRemaining == 0L && winner == null) {
+                    addLog(context.getString(R.string.LogTimerOn))
+                    controller.endGame()
+                }
             }
         }
     }
@@ -156,20 +157,24 @@ class GameViewModel(
     }
 
 
-    // Implementation of the interface
+    // Implementation of the interface (suppress lint for string format)
 
-    override fun showMessage(type: MessageType, extraInfo: String?) {
+    @SuppressLint("StringFormatMatches")
+    override fun showMessage(type: MessageType, vararg extraInfo: String) {
         val context = getApplication<Application>()
 
-        val parsedText = when (type) {
-            MessageType.RENT_PAID -> context.getString(R.string.MsgRentPaid, extraInfo)
-            MessageType.PROPERTY_BOUGHT -> context.getString(R.string.MsgPropertyBought, extraInfo)
-            MessageType.CROSS_START -> context.getString(R.string.MsgCrossStart, extraInfo)
-            MessageType.FEE_PAID -> context.getString(R.string.MsgFeePaid)
-            MessageType.GO_TO_JAIL -> context.getString(R.string.MsgGoToJail)
-            MessageType.HOUSE_BUILT -> context.getString(R.string.MsgHouseBuilt, extraInfo)
-            MessageType.BUILD_CANCELED -> context.getString(R.string.MsgBuildCanceled)
-            MessageType.GENERIC -> extraInfo ?: ""
+        val parsedText: String = when (type) {
+            MessageType.RENT_PAID -> context.getString(R.string.MsgRentPaid, *extraInfo)
+            MessageType.PROPERTY_BOUGHT -> context.getString(R.string.MsgPropertyBought, *extraInfo)
+            MessageType.CROSS_START -> context.getString(R.string.MsgCrossStart,*extraInfo, "${passGoMoney}€")
+            MessageType.FEE_PAID -> context.getString(R.string.MsgFeePaid, *extraInfo)
+            MessageType.GO_TO_JAIL -> context.getString(R.string.MsgGoToJail, *extraInfo)
+            MessageType.HOUSE_BUILT -> context.getString(R.string.MsgHouseBuilt, *extraInfo)
+            MessageType.BUILD_CANCELED -> context.getString(R.string.MsgBuildCanceled, *extraInfo)
+            MessageType.CANT_BUY_PROP -> context.getString(R.string.MsgCantAffordProperty, *extraInfo)
+            MessageType.CARD -> context.getString(R.string.MsgCardAction, *extraInfo)
+            MessageType.START_GAME -> context.getString(R.string.MsgStartGame)
+            MessageType.GENERIC -> extraInfo.firstOrNull() ?: ""
         }
 
         gameMessage = parsedText

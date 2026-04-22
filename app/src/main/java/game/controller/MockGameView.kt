@@ -25,9 +25,10 @@ class MockGameView : GameView {
     var propertyToBuild: Property? = null
 
 
-    override fun showMessage(type: MessageType, extraInfo: String?)
+    override fun showMessage(type: MessageType, vararg extraInfo: String)
     {
-        lastMessage = extraInfo ?: ""
+        lastMessage = extraInfo.firstOrNull() ?: ""
+
         println("GUI: $lastMessage")
     }
 
