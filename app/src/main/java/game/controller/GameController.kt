@@ -110,7 +110,7 @@ class GameController(
             if (startBox is Start) {
                 startBox.action(currentPlayer)
                 view.updatePlayerMoney(currentPlayer.id, currentPlayer.money)
-                view.showMessage(MessageType.CROSS_START)
+                view.showMessage(MessageType.CROSS_START, currentPlayer.name)
             }
         }
 
