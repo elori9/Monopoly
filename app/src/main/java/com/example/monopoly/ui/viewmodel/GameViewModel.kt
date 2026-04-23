@@ -44,6 +44,8 @@ class GameViewModel(
     var gameMessage by mutableStateOf("")
     var dice by mutableStateOf<Int?>(null)
     var currentPlayer by mutableStateOf<Player?>(null)
+    var showBuildDialog by mutableStateOf(false)
+    var buildOptions by mutableStateOf<List<Property>>(emptyList())
     var winner by mutableStateOf<Player?>(null)
         private set
     var logBuilder by mutableStateOf("")
@@ -73,6 +75,7 @@ class GameViewModel(
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
     var buyProperty: ((Boolean) -> Unit)? by mutableStateOf(null)
     var endTurnAction: (() -> Unit)? by mutableStateOf(null)
+    private var onHouseSelectedCallback: ((Property?) -> Unit)? = null
 
 
     // Flags for buttons activation
@@ -230,13 +233,23 @@ class GameViewModel(
         onSelected: (Property?) -> Unit
     ) {
         if (properties.isNotEmpty()) {
-            // Build on first property, no select
-            onSelected(properties.first())
-
+            // Select property with the dialog
+            buildOptions = properties
+            onHouseSelectedCallback = onSelected
+            // Open the dialog
+            showBuildDialog = true
         } else {
             // No properties to build in
             onSelected(null)
         }
+    }
+
+    fun selectHouseToBuild(property: Property?) {
+        // Hide popup
+        showBuildDialog = false
+        // Get the house from the callback
+        onHouseSelectedCallback?.invoke(property)
+        onHouseSelectedCallback = null
     }
 
     override fun showGameOver(winner: Player) {

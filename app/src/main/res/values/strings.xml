@@ -79,4 +79,6 @@
     <string name="MsgCantAffordProperty">%1$s cannot afford the property, press next turn</string>
     <string name="MsgCardAction">%1$s take a card, result: %2$s</string>
     <string name="MsgStartGame">The game started, P1 can start rolling dices</string>
+    <string name="SelectWhereBuild">Select where to build</string>
+    <string name="Cancel">Cancel</string>
 </resources>

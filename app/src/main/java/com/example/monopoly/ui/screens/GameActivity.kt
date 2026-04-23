@@ -10,7 +10,12 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +23,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.example.monopoly.R
 import com.example.monopoly.ui.components.*
 import com.example.monopoly.ui.components.animations.RollDice
@@ -161,6 +168,53 @@ fun GameScreen(
         canRoll = viewModel.canRoll,
         modifier = modifier
     )
+
+    // Show Pop up if build house is selected
+    if (viewModel.showBuildDialog)
+        ShowPopUp(viewModel, context)
+}
+
+@Composable
+fun ShowPopUp(viewModel: GameViewModel, context: Context) {
+    Popup(
+        alignment = Alignment.Center,
+        // When you press out, so you can cancel the house build
+        onDismissRequest = { viewModel.selectHouseToBuild(null) },
+        properties = PopupProperties(focusable = true)
+    ) {
+        Surface(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(0.8f),
+            shape = RoundedCornerShape(8.dp),
+            shadowElevation = 8.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(context.getString(R.string.SelectWhereBuild))
+
+                // Houses
+                viewModel.buildOptions.forEach { property ->
+                    Button(onClick = { viewModel.selectHouseToBuild(property) }) {
+                        Text("${property.name} - ${property.housePrice}€")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Cancel button
+                OutlinedButton(
+                    onClick = { viewModel.selectHouseToBuild(null) },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(context.getString(R.string.Cancel))
+                }
+            }
+        }
+    }
 }
 
 /**
