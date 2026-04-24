@@ -28,12 +28,14 @@ import androidx.compose.ui.window.PopupProperties
 import com.example.monopoly.R
 import com.example.monopoly.ui.components.*
 import com.example.monopoly.ui.components.animations.RollDice
+import com.example.monopoly.ui.components.animations.WinnerAnimation
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.GameViewModel
 import com.example.monopoly.ui.viewmodel.GameViewModelFactory
 import game.model.Player
 import game.model.box.BoxName
 import game.model.box.GameBox
+import kotlinx.coroutines.delay
 
 class GameActivity : ComponentActivity() {
     val viewModel: GameViewModel by viewModels {
@@ -110,6 +112,7 @@ fun GameScreen(
     val diceSoundId = remember { soundPool.load(context, R.raw.diceroll, 1) }
     val cashId = remember { soundPool.load(context, R.raw.cash, 1) }
     val wrong = remember { soundPool.load(context, R.raw.wrong, 1) }
+    val win = remember { soundPool.load(context, R.raw.win, 1) }
 
 
     // Clean memory on exit as the mp3 are loaded on RAM since start of screen on sound pool
@@ -126,6 +129,7 @@ fun GameScreen(
                 Sounds.BUY -> soundPool.play(cashId, 1f, 1f, 0, 0, 1f)
                 Sounds.DICE_ROLL -> soundPool.play(diceSoundId, 1f, 1f, 0, 0, 1f)
                 Sounds.WRONG -> soundPool.play(wrong, 1f, 1f, 0, 0, 1f)
+                Sounds.WIN -> soundPool.play(win, 1f, 1f, 0, 0, 1f)
             }
             // Restar the sound
             viewModel.restarSound()
@@ -137,8 +141,8 @@ fun GameScreen(
 
 
     // Send the end message if is a winner
-    LaunchedEffect(viewModel.winner) {
-        if (viewModel.winner != null) {
+    LaunchedEffect(viewModel.goToGameResults) {
+        if (viewModel.goToGameResults) {
             // Send log
             sendEndGameLog(context, viewModel.logBuilder)
         }
@@ -184,6 +188,10 @@ fun GameScreen(
     // Show Pop up if build house is selected
     if (viewModel.showBuildDialog)
         ShowPopUp(viewModel, context)
+
+    // Show winn animation
+    if (viewModel.showWinnerAnimation && viewModel.winner != null)
+        WinnerAnimation(winner = viewModel.winner!!.name)
 }
 
 @Composable
@@ -552,6 +560,9 @@ private fun sendEndGameLog(context: Context, info: String) {
         putExtra("INFO", info)
     }
     context.startActivity(intent)
+
+    // Close this activity (so first we need to cast the context for do it)
+    (context as? ComponentActivity)?.finish()
 }
 
 @Preview(showBackground = true, widthDp = 800, heightDp = 400)

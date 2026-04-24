@@ -82,6 +82,10 @@ class GameViewModel(
         private set
     var soundTrigger by mutableStateOf<Sounds?>(null)
         private set
+    var showWinnerAnimation by mutableStateOf(false)
+        private set
+    var goToGameResults by mutableStateOf(false)
+        private set
 
     // Those will be the callbacks
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
@@ -309,6 +313,16 @@ class GameViewModel(
         this.winner = winner
         gameMessage = context.getString(R.string.WinnerShowMessage, winner.name)
         addLog("${context.getString(R.string.LogWinner)} ${winner.name}")
+
+        // Show the animation and play the sound
+        showWinnerAnimation = true
+        soundTrigger = Sounds.WIN
+
+        // Count 3 seconds and then go to the results
+        viewModelScope.launch {
+            delay(3000L)
+            goToGameResults = true
+        }
     }
 
     override fun updatePropertyOwner(playerId: Int, position: Int) {
