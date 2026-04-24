@@ -109,11 +109,26 @@ fun GameScreen(
     // Sounds
     val diceSoundId = remember { soundPool.load(context, R.raw.diceroll, 1) }
     val cashId = remember { soundPool.load(context, R.raw.cash, 1) }
+    val wrong = remember { soundPool.load(context, R.raw.wrong, 1) }
+
 
     // Clean memory on exit as the mp3 are loaded on RAM since start of screen on sound pool
     DisposableEffect(Unit) {
         onDispose {
             soundPool.release()
+        }
+    }
+
+    // Sounds trigger
+    LaunchedEffect(viewModel.soundTrigger) {
+        viewModel.soundTrigger?.let { sound ->
+            when (sound) {
+                Sounds.BUY -> soundPool.play(cashId, 1f, 1f, 0, 0, 1f)
+                Sounds.DICE_ROLL -> soundPool.play(diceSoundId, 1f, 1f, 0, 0, 1f)
+                Sounds.WRONG -> soundPool.play(wrong, 1f, 1f, 0, 0, 1f)
+            }
+            // Restar the sound
+            viewModel.restarSound()
         }
     }
 
@@ -147,7 +162,6 @@ fun GameScreen(
         ownedPropertyIcons = currentOwnedIcons,
         gameMessage = viewModel.gameMessage,
         onBuyProperty = {
-            soundPool.play(cashId, 1f, 1f, 0, 0, 1f)
             viewModel.onBuyPropertyDecision(true)
         },
         onBuyHouse = {
@@ -157,8 +171,6 @@ fun GameScreen(
             viewModel.onNextTurnClicked()
         },
         onRollDice = {
-            // Play sound and roll
-            soundPool.play(diceSoundId, 1f, 1f, 0, 0, 1f)
             viewModel.onRollDiceClicked()
         },
         canBuyProperty = viewModel.canBuyProperty,

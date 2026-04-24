@@ -142,7 +142,7 @@ class GameController(
             it.numHouses < 5 && currentPlayer.money >= it.housePrice
         }
         if (canBuild.isEmpty()) {
-            view.showMessage(MessageType.BUILD_CANCELED, currentPlayer.name)
+            view.showMessage(MessageType.BUILD_CANCELED_NO_MONEY, currentPlayer.name)
             // Ask for his turn, as he didn't roll the dices
             nextTurn()
             return

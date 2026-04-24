@@ -75,7 +75,8 @@
     <string name="MsgFeePaid">%1$s paid a fee</string>
     <string name="MsgGoToJail">%1$s go to the jail</string>
     <string name="MsgHouseBuilt">%1$s built a house in %2$s</string>
-    <string name="MsgBuildCanceled">%1$s cannot afford the house, build canceled</string>
+    <string name="MsgBuildCanceledNoMoney">%1$s cannot afford the house, build canceled</string>
+    <string name="MsgBuildCanceled">%1$s canceled the house build</string>
     <string name="MsgCantAffordProperty">%1$s cannot afford the property, press next turn</string>
     <string name="MsgCardAction">%1$s take a card, result: %2$s</string>
     <string name="MsgStartGame">The game started, P1 can start rolling dices</string>

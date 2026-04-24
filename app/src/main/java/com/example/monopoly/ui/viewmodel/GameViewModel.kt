@@ -25,6 +25,7 @@ import game.model.Dice
 import game.model.MessageType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.example.monopoly.ui.components.Sounds
 
 
 class GameViewModel(
@@ -62,13 +63,24 @@ class GameViewModel(
     private val boxesPerSide = board.size / 4
 
     // neverEqualPolicy() forces Compose to re-render the board when the list is reassigned.
-    var bottomBoxes by mutableStateOf(board.gameBoxes.subList(0, boxesPerSide + 1).reversed().toList(), neverEqualPolicy())
+    var bottomBoxes by mutableStateOf(
+        board.gameBoxes.subList(0, boxesPerSide + 1).reversed().toList(), neverEqualPolicy()
+    )
         private set
-    var leftBoxes by mutableStateOf(board.gameBoxes.subList(boxesPerSide + 1, (boxesPerSide * 2)).toList(), neverEqualPolicy())
+    var leftBoxes by mutableStateOf(
+        board.gameBoxes.subList(boxesPerSide + 1, (boxesPerSide * 2)).toList(), neverEqualPolicy()
+    )
         private set
-    var topBoxes by mutableStateOf(board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1).toList(), neverEqualPolicy())
+    var topBoxes by mutableStateOf(
+        board.gameBoxes.subList(boxesPerSide * 2, (boxesPerSide * 3) + 1).toList(),
+        neverEqualPolicy()
+    )
         private set
-    var rightBoxes by mutableStateOf(board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size).toList(), neverEqualPolicy())
+    var rightBoxes by mutableStateOf(
+        board.gameBoxes.subList((boxesPerSide * 3) + 1, board.size).toList(), neverEqualPolicy()
+    )
+        private set
+    var soundTrigger by mutableStateOf<Sounds?>(null)
         private set
 
     // Those will be the callbacks
@@ -83,6 +95,11 @@ class GameViewModel(
     val canBuyProperty get() = buyProperty != null
     val canNextTurn get() = endTurnAction != null
     val canBuyHouse get() = turnAction != null
+
+    // Sounds restar
+    fun restarSound() {
+        soundTrigger = null
+    }
 
 
     // Controller
@@ -143,16 +160,19 @@ class GameViewModel(
         turnAction = null
         callback?.invoke(TurnAction.ROLL_DICE)
     }
+
     fun onBuyHouseClicked() {
         val callback = turnAction
         turnAction = null
         callback?.invoke(TurnAction.BUILD_HOUSE)
     }
+
     fun onBuyPropertyDecision(buy: Boolean) {
         val callback = buyProperty
         buyProperty = null
         callback?.invoke(buy)
     }
+
     fun onNextTurnClicked() {
         val callback = endTurnAction
         endTurnAction = null
@@ -169,12 +189,26 @@ class GameViewModel(
         val parsedText: String = when (type) {
             MessageType.RENT_PAID -> context.getString(R.string.MsgRentPaid, *extraInfo)
             MessageType.PROPERTY_BOUGHT -> context.getString(R.string.MsgPropertyBought, *extraInfo)
-            MessageType.CROSS_START -> context.getString(R.string.MsgCrossStart,*extraInfo, "${passGoMoney}€")
+            MessageType.CROSS_START -> context.getString(
+                R.string.MsgCrossStart,
+                *extraInfo,
+                "${passGoMoney}€"
+            )
+
             MessageType.FEE_PAID -> context.getString(R.string.MsgFeePaid, *extraInfo)
             MessageType.GO_TO_JAIL -> context.getString(R.string.MsgGoToJail, *extraInfo)
             MessageType.HOUSE_BUILT -> context.getString(R.string.MsgHouseBuilt, *extraInfo)
+            MessageType.BUILD_CANCELED_NO_MONEY -> context.getString(
+                R.string.MsgBuildCanceledNoMoney,
+                *extraInfo
+            )
+
             MessageType.BUILD_CANCELED -> context.getString(R.string.MsgBuildCanceled, *extraInfo)
-            MessageType.CANT_BUY_PROP -> context.getString(R.string.MsgCantAffordProperty, *extraInfo)
+            MessageType.CANT_BUY_PROP -> context.getString(
+                R.string.MsgCantAffordProperty,
+                *extraInfo
+            )
+
             MessageType.CARD -> context.getString(R.string.MsgCardAction, *extraInfo)
             MessageType.START_GAME -> context.getString(R.string.MsgStartGame)
             MessageType.GENERIC -> extraInfo.firstOrNull() ?: ""
@@ -183,9 +217,25 @@ class GameViewModel(
         gameMessage = parsedText
         addLog(parsedText)
 
-        // Trigger board recomposition for visual changes like houses
-        if (type == MessageType.HOUSE_BUILT || type == MessageType.PROPERTY_BOUGHT) {
-            triggerBoardRecomposition()
+        // Trigger board recomposition for visual changes like houses and sound selection
+        when (type) {
+            MessageType.HOUSE_BUILT,
+            MessageType.PROPERTY_BOUGHT -> {
+                triggerBoardRecomposition()
+                // Select the sound
+                soundTrigger = Sounds.BUY
+            }
+
+            MessageType.BUILD_CANCELED,
+            MessageType.CANT_BUY_PROP,
+            MessageType.BUILD_CANCELED_NO_MONEY -> {
+                // Select the sound
+                soundTrigger = Sounds.WRONG
+            }
+
+            else -> {
+                // Nothing for the other messages
+            }
         }
     }
 
@@ -202,6 +252,8 @@ class GameViewModel(
         val context = getApplication<Application>()
         gameMessage = context.getString(R.string.ShowDiceRollMessage, playerName, roll)
         dice = roll
+        // Select the sound
+        soundTrigger = Sounds.DICE_ROLL
     }
 
     override fun updatePlayerPosition(playerId: Int, newPosition: Int) {
