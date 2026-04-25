@@ -178,7 +178,6 @@ fun ResultsScreenPortrait(
         ) {
             // Header
             HeaderArea()
-            Spacer(modifier = Modifier.height(20.dp))
 
             // Date
             DateArea(date)
@@ -282,7 +281,7 @@ fun HeaderArea() {
         fontWeight = FontWeight.Black,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 32.dp)
     )
 }
 
