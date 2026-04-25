@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -208,6 +209,71 @@ fun SmartPropertiesArea(
             scrollState = scrollState,
             onCardClick = { resId -> expandedImageRes = resId },
             modifier = Modifier.fillMaxWidth()
+        )
+
+        // Overlay
+        OverlayForImage(expandedImageRes = expandedImageRes, onClose = { expandedImageRes = null })
+    }
+}
+
+/**
+ * Show the owned properties in a vertically scrollable column
+ */
+@Composable
+fun ShowOwnedPropertiesVertical(
+    ownedPropertyIcons: List<Int>,
+    scrollState: ScrollState,
+    onCardClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(scrollState),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (ownedPropertyIcons.isEmpty()) {
+            Text(
+                text = stringResource(id = R.string.NoProperties),
+                color = Color.DarkGray,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
+        } else {
+            ownedPropertyIcons.forEach { iconRes ->
+                Image(
+                    painter = painterResource(id = iconRes),
+                    contentDescription = "Property Card",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(0.7f)
+                        .clickable { onCardClick(iconRes) },
+                    contentScale = ContentScale.Fit
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Stateful function for draw properties vertically
+ */
+@Composable
+fun SmartPropertiesAreaVertical(
+    ownedPropertyIcons: List<Int>,
+    modifier: Modifier = Modifier
+) {
+    val scrollState = rememberScrollState()
+    var expandedImageRes by remember { mutableStateOf<Int?>(null) }
+
+    Box(modifier = modifier) {
+        // Draw properties
+        ShowOwnedPropertiesVertical(
+            ownedPropertyIcons = ownedPropertyIcons,
+            scrollState = scrollState,
+            onCardClick = { resId -> expandedImageRes = resId },
+            modifier = Modifier.fillMaxHeight()
         )
 
         // Overlay

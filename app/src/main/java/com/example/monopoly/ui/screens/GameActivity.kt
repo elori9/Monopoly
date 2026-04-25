@@ -461,20 +461,23 @@ fun DrawLandscape(
         // Left Column: Owned Properties
         Column(
             modifier = Modifier
-                .weight(0.15f)
-                .padding(end = 10.dp),
+                .weight(0.18f)
+                .padding(end = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            SmartPropertiesArea(ownedPropertyIcons = ownedPropertyIcons)
+            SmartPropertiesAreaVertical(
+                ownedPropertyIcons = ownedPropertyIcons,
+                modifier = Modifier.fillMaxHeight()
+            )
         }
 
         // Middle Box: Board
         Box(
             modifier = Modifier
-                .weight(0.55f)
+                .weight(0.52f)
                 .fillMaxHeight()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 8.dp),
             contentAlignment = Alignment.Center
         ) {
             BoardArea(
@@ -517,7 +520,7 @@ fun DrawLandscape(
                 playerName = currentPlayerName,
                 playerIconRes = getTokenByPlayerId(currentPlayerId),
                 modifier = Modifier
-                    .weight(0.15f)
+                    .weight(0.2f)
                     .padding(vertical = 4.dp)
             )
 
@@ -536,7 +539,7 @@ fun DrawLandscape(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(0.6f)
+                    .weight(0.55f)
                     .padding(start = 16.dp),
             ) {
                 ShowPlayerActions(
