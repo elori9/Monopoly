@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -36,10 +37,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -58,6 +55,10 @@ import java.util.Locale
 import kotlin.system.exitProcess
 import androidx.core.net.toUri
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 
 class Results : ComponentActivity() {
     private val viewModel: ResultsViewModel by viewModels()
@@ -160,38 +161,50 @@ fun ResultsScreenPortrait(
     modifier: Modifier = Modifier
 ) {
     val screenScrollState = rememberScrollState()
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(screenScrollState)
-    ) {
-        // Header
-        HeaderArea()
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Date
-        DateArea(date)
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Log values
-        LogValuesArea(
-            logInfo, Modifier
-                .heightIn(max = 250.dp) // Don't make it too big
-                .padding(horizontal = 16.dp, vertical = 12.dp) // External padding
-                .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
-                .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp, vertical = 12.dp) // Internal paddin
+    Box (Modifier.fillMaxSize()) {
+        // Background image
+        Image(
+            painter = painterResource(id = R.drawable.resultsbackgroundvertical),
+            contentDescription = "Background",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
-        Spacer(modifier = Modifier.height(20.dp))
 
-        // Email
-        EmailArea(emailValue, onEmailChange)
-        Spacer(modifier = Modifier.height(20.dp))
+        // Content
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .verticalScroll(screenScrollState)
+        ) {
+            // Header
+            HeaderArea()
+            Spacer(modifier = Modifier.height(20.dp))
 
-        // Buttons
-        ButtonsArea(onSendEmail, onNewGame, onExit)
+            // Date
+            DateArea(date)
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Log values
+            LogValuesArea(
+                logInfo, Modifier
+                    .heightIn(max = 250.dp) // Don't make it too big
+                    .padding(horizontal = 16.dp, vertical = 12.dp) // External padding
+                    .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
+                    .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp, vertical = 12.dp) // Internal paddin
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Email
+            EmailArea(emailValue, onEmailChange)
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Buttons
+            ButtonsArea(onSendEmail, onNewGame, onExit)
+        }
     }
+
 }
 
 @Composable
@@ -206,43 +219,54 @@ fun ResultsScreenLandscape(
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier.fillMaxSize()
-    ) {
-        // Header
-        HeaderArea()
-
-        Row(
+    Box (Modifier.fillMaxSize()) {
+        // Background image
+        Image(
+            painter = painterResource(id = R.drawable.resultsbackgroundhz),
+            contentDescription = "Background",
             modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.Top
-        ) {
-            // Left Column
-            Column(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxHeight()
-            ) {
-                DateArea(date)
-                LogValuesArea(
-                    logInfo, Modifier
-                        .heightIn(max = 150.dp) // Don't make it too big
-                        .padding(horizontal = 16.dp, vertical = 12.dp) // External padding
-                        .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
-                        .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = 16.dp, vertical = 12.dp) // Internal paddin
-                )
-            }
+            contentScale = ContentScale.Crop
+        )
 
-            // Right column
-            Column(
-                modifier = Modifier
-                    .weight(0.5f)
-                    .fillMaxHeight()
+        // Content
+        Column(
+            modifier = modifier.fillMaxSize()
+        ) {
+            // Header
+            HeaderArea()
+
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.Top
             ) {
-                EmailArea(emailValue, onEmailChange)
-                Spacer(modifier = Modifier.height(12.dp))
-                ButtonsArea(onSendEmail, onNewGame, onExit)
+                // Left Column
+                Column(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .fillMaxHeight()
+                ) {
+                    DateArea(date)
+                    LogValuesArea(
+                        logInfo, Modifier
+                            .heightIn(max = 150.dp) // Don't make it too big
+                            .padding(horizontal = 16.dp, vertical = 12.dp) // External padding
+                            .background(Color(0xFFF5F5F5), shape = RoundedCornerShape(8.dp))
+                            .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+                            .verticalScroll(scrollState)
+                            .padding(horizontal = 16.dp, vertical = 12.dp) // Internal paddin
+                    )
+                }
+
+                // Right column
+                Column(
+                    modifier = Modifier
+                        .weight(0.5f)
+                        .fillMaxHeight()
+                ) {
+                    EmailArea(emailValue, onEmailChange)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ButtonsArea(onSendEmail, onNewGame, onExit)
+                }
             }
         }
     }
@@ -253,8 +277,9 @@ fun HeaderArea() {
     // Title
     Text(
         text = stringResource(R.string.TittleGameResults),
-        fontSize = 24.sp,
+        fontSize = 34.sp,
         textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Black,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
@@ -268,6 +293,7 @@ fun DateArea(date: String) {
         text = stringResource(R.string.GameResultDateTittle),
         fontSize = 18.sp,
         textAlign = TextAlign.Left,
+        fontWeight = FontWeight.Black,
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp)
@@ -297,6 +323,7 @@ fun LogValuesArea(logInfo: String, modifier: Modifier) {
         text = stringResource(R.string.GameResultLogTittle),
         fontSize = 18.sp,
         textAlign = TextAlign.Left,
+        fontWeight = FontWeight.Black,
         modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp)
@@ -318,6 +345,7 @@ fun EmailArea(emailValue: String, onEmailChange: (String) -> Unit) {
     Text(
         text = stringResource(R.string.GameResultEmailTittle),
         fontSize = 18.sp,
+        fontWeight = FontWeight.Black,
         textAlign = TextAlign.Left,
         modifier = Modifier
             .fillMaxWidth()
@@ -331,9 +359,14 @@ fun EmailArea(emailValue: String, onEmailChange: (String) -> Unit) {
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
         label = { Text(stringResource(id = R.string.TextFieldEnterTextEmail)) },
         placeholder = { Text(stringResource(id = R.string.DefaultEmail)) },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
+
     )
 }
 
@@ -400,7 +433,7 @@ fun ColumnScope.ButtonsArea(onSendEmail: () -> Unit, onNewGame: () -> Unit, onEx
     }
 }
 
-@Preview(showBackground = true, heightDp =350, widthDp = 700)
+@Preview(showBackground = true, heightDp = 900, widthDp = 600)
 @Composable
 fun ResultsPreview() {
     MonopolyTheme {
