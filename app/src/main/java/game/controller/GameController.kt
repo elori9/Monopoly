@@ -204,7 +204,7 @@ class GameController(
                     if (gameBox.owner != player) {
                         // Use !! bc owner can't be null on this point
                         view.updatePlayerMoney(gameBox.owner!!.id, gameBox.owner!!.money)
-                        view.showMessage(MessageType.RENT_PAID, player.name, gameBox.name)
+                        view.showMessage(MessageType.RENT_PAID, gameBox.owner!!.name, gameBox.name)
                     }
 
                     // End the turn

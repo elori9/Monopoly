@@ -267,7 +267,9 @@ class GameViewModel(
 
     override fun updatePlayerMoney(playerId: Int, money: Int) {
         // Compose will redraw the player, who will update the money, there save the update
-        currentPlayerMoney = money
+        if (currentPlayer?.id == playerId) {
+            currentPlayerMoney = money
+        }
         triggerPlayerRecomposition(playerId)
     }
 
