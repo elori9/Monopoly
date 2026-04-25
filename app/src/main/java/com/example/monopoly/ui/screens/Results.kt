@@ -94,10 +94,8 @@ class Results : ComponentActivity() {
                             finish()
                         },
                         onExit = {
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP // Flag to clean the activity stack
-                            startActivity(intent)
-                            finish()
+                            finishAffinity()
+                            exitProcess(0)
                         },
                         modifier = Modifier.padding(innerPadding)
                     )
