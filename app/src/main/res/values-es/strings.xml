@@ -25,6 +25,9 @@
     <string name="FeeLabel">Impuesto</string>
     <string name="BoxesInfo">Casillas (haz clic para desplegar)</string>
     <string name="Instructions">Este Monopoly adaptado y de ritmo rápido admite de dos a cuatro jugadores con nombres personalizados y presenta un tablero dinámico que se escala según el número de jugadores.\n\nEl juego está simplificado: simplemente tira los dados haciendo clic en ellos, mueve tu ficha y resuelve la acción de la casilla. El tablero consta de cinco tipos de casillas: Salida para cobrar dinero, Propiedades para comprar y construir, Impuestos que gravan tus fondos, Cartas para eventos de suerte inesperados y Cárcel.\n\nSe elimina la restricción de grupo de color, lo que te permite construir casas inmediatamente en cualquier propiedad que poseas para aumentar el alquiler que deben pagar los oponentes. Ten cuidado con la casilla de Cárcel estricta, que te obliga instantáneamente a saltarte los tres próximos turnos.\n\nEl juego termina cuando los oponentes no pueden pagar sus deudas y caen en bancarrota, dejando a un único superviviente. Alternativamente, si activas el temporizador opcional, la partida acaba cuando la cuenta atrás llega a cero, coronando como ganador al jugador con el valor neto combinado más alto de efectivo y propiedades.</string>
+    <string name="DiceInfoTittle">Como jugar el turno</string>
+    <string name="DiceInfo">Primero tendrás que tirar los dados y después podrás comprar o ejecutar automáticamente la acción, finalmente podrás pulsar el siguiente turno</string>
+    <string name="Dice">Dado</string>
     <string name="AdditionalInfoTitle">Información Adicional</string>
     <string name="AdditionalInfoText">Para más información puedes visitar nuestro proyecto en GitHub</string>
     <string name="Searching">Buscando…</string>

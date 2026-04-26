@@ -25,6 +25,9 @@
     <string name="FeeLabel">Impost</string>
     <string name="BoxesInfo">Caselles (feu clic per desplegar)</string>
     <string name="Instructions">Aquest Monopoly adaptat i de ritme ràpid admet de dos a quatre jugadors amb noms personalitzats i presenta un tauler dinàmic que s\'escala en funció del nombre de jugadors.\n\nEl joc està simplificat: simplement tira els daus fent-hi clic, mou la teva fitxa i resol l\'acció de la casella. El tauler consta de cinc tipus de caselles: Sortida per cobrar diners, Propietats per comprar i desenvolupar, Impostos que graven els teus fons, Cartes per a esdeveniments de sort inesperats i Presó.\n\nS\'elimina la restricció de grup de color, la qual cosa et permet construir cases immediatament a qualsevol propietat que tinguis per augmentar el lloguer que han de pagar els oponents. Vés amb compte amb la casella de Presó estricta, que t\'obliga instantàniament a saltar-te els tres propers torns.\n\nEl joc acaba quan els oponents no poden pagar els seus deutes i fan fallida, deixant un únic supervivent. Alternativament, si actives el temporitzador opcional, la partida acaba quan el compte enrere arriba a zero, coronant com a guanyador el jugador amb el valor net combinat més alt d\'efectiu i propietats.</string>
+    <string name="DiceInfoTittle">Com jugar el torn</string>
+    <string name="DiceInfo">Primer has de llençar els daus y després podrás comprar o executar automaticament la acció, finalment haurás de apretar al seguent turn</string>
+    <string name="Dice">Dau</string>
     <string name="AdditionalInfoTitle">Informació Addicional</string>
     <string name="AdditionalInfoText">Per a més informació pots visitar el nostre projecte a GitHub</string>
     <string name="Searching">Cercant…</string>

@@ -150,7 +150,6 @@ fun HelpContent(
         }
 
         item {
-
             // Body
             Text(
                 text = stringResource(R.string.Instructions),
@@ -166,6 +165,20 @@ fun HelpContent(
             // Pieces
             SectionTitle(stringResource(R.string.PiecesInfo))
             ShowPieces()
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        item {
+            // Dice
+            SectionTitle(stringResource(R.string.DiceInfoTittle))
+            Text(
+                text = stringResource(R.string.DiceInfo),
+                fontSize = 16.sp,
+                lineHeight = 28.sp,
+                textAlign = TextAlign.Justify,
+                modifier = Modifier.fillMaxWidth()
+            )
+            ShowDice()
             Spacer(modifier = Modifier.height(24.dp))
         }
 
@@ -226,6 +239,19 @@ fun ShowPieces() {
         TokenPreview(imageId = R.drawable.icon2, stringResource(R.string.PickaxeLabel))
         TokenPreview(imageId = R.drawable.icon3, stringResource(R.string.ChestLabel))
         TokenPreview(imageId = R.drawable.icon4, stringResource(R.string.ShieldLabel))
+    }
+}
+
+/**
+ * Show the dice
+ */
+@Composable
+fun ShowDice() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        TokenPreview(imageId = R.drawable.dice_1, stringResource(R.string.Dice))
     }
 }
 
