@@ -85,4 +85,6 @@
     <string name="MsgStartGame">La partida ha empezado, P1 puede empezar a tirar los dados</string>
     <string name="SelectWhereBuild">Selecciona dónde construir</string>
     <string name="Cancel">Cancelar</string>
+    <string name="ConfSaved">Configuración guardada</string>
+    <string name="Save">Guardar</string>
 </resources>

@@ -85,4 +85,6 @@
     <string name="MsgStartGame">The game started, P1 can start rolling dices</string>
     <string name="SelectWhereBuild">Select where to build</string>
     <string name="Cancel">Cancel</string>
+    <string name="ConfSaved">Configuration saved</string>
+    <string name="Save">Save</string>
 </resources>

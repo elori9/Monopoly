@@ -85,4 +85,6 @@
     <string name="MsgStartGame">La partida ha començat, P1 pot començar a tirar els daus</string>
     <string name="SelectWhereBuild">Selecciona on construir</string>
     <string name="Cancel">Cancel·lar</string>
+    <string name="ConfSaved">Configuració guardada</string>
+    <string name="Save">Guardar</string>
 </resources>

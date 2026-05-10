@@ -55,7 +55,6 @@ fun AppNavigation() {
             ConfigScreen(
                 viewModel = configViewModel,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToGame = { navController.navigate(MenuScreens.NewGame.name) }
             )
         }
 

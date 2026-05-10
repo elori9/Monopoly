@@ -37,7 +37,6 @@ fun ConfigScreen(
     modifier: Modifier = Modifier,
     viewModel: ConfigActivityViewModel = viewModel(),
     onNavigateBack: () -> Unit,
-    onNavigateToGame: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -67,7 +66,8 @@ fun ConfigScreen(
         onTaxesPriceChange = { viewModel.updateTaxesPrice(it) },
         onSave = {
             viewModel.saveSettings()
-            Toast.makeText(context, "Preferencias guardadas", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.ConfSaved), Toast.LENGTH_SHORT)
+                .show()
         },
         modifier = modifier
     )
@@ -521,7 +521,7 @@ fun SaveSettingsButton(
             contentColor = Color.White
         )
     ) {
-        Text(text = "Guardar", fontSize = 20.sp, color = Color.White)
+        Text(text = stringResource(R.string.Save), fontSize = 20.sp, color = Color.White)
     }
 }
 
