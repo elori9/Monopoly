@@ -65,6 +65,10 @@ fun ConfigScreen(
         onPassGoMoneyChange = { viewModel.updatePassGoMoney(it) },
         onJailTurnsChange = { viewModel.updateJailTurns(it) },
         onTaxesPriceChange = { viewModel.updateTaxesPrice(it) },
+        onSave = {
+            viewModel.saveSettings()
+            Toast.makeText(context, "Preferencias guardadas", Toast.LENGTH_SHORT).show()
+        },
         modifier = modifier
     )
 }
@@ -94,6 +98,7 @@ fun ConfigContent(
     onPassGoMoneyChange: (String) -> Unit,
     onJailTurnsChange: (String) -> Unit,
     onTaxesPriceChange: (String) -> Unit,
+    onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (isPortrait) {
@@ -117,6 +122,7 @@ fun ConfigContent(
             onPassGoMoneyChange = onPassGoMoneyChange,
             onJailTurnsChange = onJailTurnsChange,
             onTaxesPriceChange = onTaxesPriceChange,
+            onSave = onSave,
             modifier = modifier
         )
     } else {
@@ -140,6 +146,7 @@ fun ConfigContent(
             onPassGoMoneyChange = onPassGoMoneyChange,
             onJailTurnsChange = onJailTurnsChange,
             onTaxesPriceChange = onTaxesPriceChange,
+            onSave = onSave,
             modifier = modifier
         )
     }
@@ -166,6 +173,7 @@ fun DrawConfigPortrait(
     onPassGoMoneyChange: (String) -> Unit,
     onJailTurnsChange: (String) -> Unit,
     onTaxesPriceChange: (String) -> Unit,
+    onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -225,6 +233,11 @@ fun DrawConfigPortrait(
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
+
+        item {
+            SaveSettingsButton(onClick = onSave)
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 }
 
@@ -249,6 +262,7 @@ fun DrawConfigLandscape(
     onPassGoMoneyChange: (String) -> Unit,
     onJailTurnsChange: (String) -> Unit,
     onTaxesPriceChange: (String) -> Unit,
+    onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -318,6 +332,11 @@ fun DrawConfigLandscape(
                         onJailTurnsChange = onJailTurnsChange,
                         onTaxesPriceChange = onTaxesPriceChange,
                     )
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    SaveSettingsButton(onClick = onSave)
                 }
             }
         }
@@ -487,6 +506,26 @@ fun StartGameButton(
 }
 
 @Composable
+fun SaveSettingsButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .height(56.dp)
+            .width(200.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF4CAF50),
+            contentColor = Color.White
+        )
+    ) {
+        Text(text = "Guardar", fontSize = 20.sp, color = Color.White)
+    }
+}
+
+@Composable
 fun AdvancedConfiguration(
     isEnabled: Boolean,
     startingMoney: String,
@@ -614,7 +653,8 @@ fun AdvancedConfigPreview() {
                 onStartingMoneyChange = { startingMoney = it },
                 onPassGoMoneyChange = { passGoMoney = it },
                 onJailTurnsChange = { jailTurns = it },
-                onTaxesPriceChange = { taxesPrice = it }
+                onTaxesPriceChange = { taxesPrice = it },
+                onSave = { }
             )
         }
     }
