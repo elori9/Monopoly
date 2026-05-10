@@ -11,8 +11,13 @@ class ResultsViewModel : ViewModel() {
     var email by mutableStateOf("")
         private set
 
+    var logInfo by mutableStateOf("")
+        private set
+
+
     // Functions
     fun updateEmail(newEmail: String) {
         email = newEmail
     }
+
 }

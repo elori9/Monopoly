@@ -3,10 +3,6 @@ package com.example.monopoly.ui.screens
 import android.content.Intent
 import android.content.res.Configuration
 import android.icu.util.Calendar
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -34,7 +30,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,87 +44,56 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
 import com.example.monopoly.ui.screens.ui.theme.MonopolyTheme
-import com.example.monopoly.ui.viewmodel.ResultsViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.system.exitProcess
 import androidx.core.net.toUri
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-
-class Results : ComponentActivity() {
-    private val viewModel: ResultsViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val gameInfo = intent?.getStringExtra("INFO") ?: "No game log"
-
-        val calendar = Calendar.getInstance()
-        val formatter = SimpleDateFormat("MMM dd, yyyy hh:mm:ss a", Locale.ENGLISH)
-        val date = formatter.format(calendar.time)
-
-        setContent {
-            MonopolyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ResultsScreen(
-                        logInfo = gameInfo,
-                        date = date,
-                        emailValue = viewModel.email,
-                        onEmailChange = { viewModel.updateEmail(it) },
-                        onSendEmail = {
-                            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = "mailto:".toUri()
-                                putExtra(Intent.EXTRA_EMAIL, arrayOf(viewModel.email))
-                                putExtra(Intent.EXTRA_SUBJECT, "Log Monopoly - $date")
-                                putExtra(Intent.EXTRA_TEXT, gameInfo)
-                            }
-                            startActivity(Intent.createChooser(intent, "Enviar log..."))
-                        },
-                        onNewGame = {
-                            val intent = Intent(this, ConfigActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            startActivity(intent)
-                            finish()
-                        },
-                        onExit = {
-                            finishAffinity()
-                            exitProcess(0)
-                        },
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
-    }
-}
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.monopoly.ui.viewmodel.ResultsViewModel
 
 @Composable
 fun ResultsScreen(
     logInfo: String,
-    date: String,
-    emailValue: String,
-    onEmailChange: (String) -> Unit,
-    onSendEmail: () -> Unit,
+    viewModel: ResultsViewModel = viewModel(),
     onNewGame: () -> Unit,
     onExit: () -> Unit,
     modifier: Modifier
 ) {
+    val context = LocalContext.current
     val logScrollState = rememberScrollState()
 
+    val calendar = Calendar.getInstance()
+    val formatter = SimpleDateFormat("MMM dd, yyyy hh:mm:ss a", Locale.ENGLISH)
+    val date = formatter.format(calendar.time)
+
     val isPortrait =
-        LocalContext.current.resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+        LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+
+    val onSendEmail = {
+        {
+            val intent = Intent(Intent.ACTION_SENDTO).apply {
+                data = "mailto:".toUri()
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(viewModel.email))
+                putExtra(Intent.EXTRA_SUBJECT, "Log Monopoly - $date")
+                putExtra(Intent.EXTRA_TEXT, logInfo)
+            }
+            context.startActivity(Intent.createChooser(intent, "Enviar log..."))
+        }
+    }
 
     if (isPortrait) {
         ResultsScreenPortrait(
             logInfo = logInfo,
             date = date,
-            emailValue = emailValue,
+            emailValue = viewModel.email,
             scrollState = logScrollState,
-            onEmailChange = onEmailChange,
-            onSendEmail = onSendEmail,
+            onEmailChange = { viewModel.updateEmail(it) },
+            onSendEmail = { onSendEmail() },
             onNewGame = onNewGame,
             onExit = onExit
         )
@@ -137,10 +101,10 @@ fun ResultsScreen(
         ResultsScreenLandscape(
             logInfo = logInfo,
             date = date,
-            emailValue = emailValue,
+            emailValue = viewModel.email,
             scrollState = logScrollState,
-            onEmailChange = onEmailChange,
-            onSendEmail = onSendEmail,
+            onEmailChange = { viewModel.updateEmail(it) },
+            onSendEmail = { onSendEmail() },
             onNewGame = onNewGame,
             onExit = onExit
         )
@@ -161,7 +125,7 @@ fun ResultsScreenPortrait(
     modifier: Modifier = Modifier
 ) {
     val screenScrollState = rememberScrollState()
-    Box (Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize()) {
         // Background image
         Image(
             painter = painterResource(id = R.drawable.resultsbackgroundvertical),
@@ -218,7 +182,7 @@ fun ResultsScreenLandscape(
     onExit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box (Modifier.fillMaxSize()) {
+    Box(Modifier.fillMaxSize()) {
         // Background image
         Image(
             painter = painterResource(id = R.drawable.resultsbackgroundhz),
@@ -447,11 +411,7 @@ fun ResultsPreview() {
                     "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
                     "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
                     "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo",
-            emailValue = "abc@example.com",
-            date = "Apr 11, 2026 21:30:00 PM",
-            onEmailChange = {},
             onNewGame = {},
-            onSendEmail = {},
             onExit = {},
             modifier = Modifier
         )

@@ -1,21 +1,13 @@
 package com.example.monopoly.ui.screens
 
-import android.content.Intent
 import android.content.res.Configuration
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
@@ -32,32 +24,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopoly.R
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
-
-class ConfigActivity : ComponentActivity() {
-    // Use ViewModel to manage state
-    private val viewModel: ConfigActivityViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MonopolyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ConfigScreen(modifier = Modifier.padding(innerPadding), viewModel = viewModel)
-                }
-            }
-        }
-    }
-}
 
 /**
  * Stateful Composable that manages the state for the configuration screen.
  */
 @Composable
-fun ConfigScreen(modifier: Modifier = Modifier, viewModel: ConfigActivityViewModel) {
+fun ConfigScreen(
+    modifier: Modifier = Modifier,
+    viewModel: ConfigActivityViewModel = viewModel(),
+    onNavigateBack: () -> Unit,
+    onNavigateToGame: () -> Unit
+) {
     val context = LocalContext.current
 
     // Detect orientation
@@ -73,30 +54,7 @@ fun ConfigScreen(modifier: Modifier = Modifier, viewModel: ConfigActivityViewMod
         onPlayerNameChange = { index, name -> viewModel.updatePlayerName(index, name) },
         onTimerToggle = { viewModel.toggleTimer(it) },
         onTimeLimitChange = { viewModel.updateTimeLimit(it) },
-        onExit = {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            context.startActivity(intent)
-        },
-        onStartGame = {
-            if (!viewModel.areAllNamesFilled()) {
-                Toast.makeText(context, "Please enter all player names", Toast.LENGTH_SHORT).show()
-            } else {
-                val intent = Intent(context, GameActivity::class.java).apply {
-                    putExtra("NUM_PLAYERS", viewModel.numPlayers)
-                    putStringArrayListExtra(
-                        "PLAYER_NAMES",
-                        ArrayList(viewModel.getSelectedPlayerNames())
-                    )
-                    putExtra("TIME_LIMIT", viewModel.getFinalTimeLimit())
-                    putExtra("STARTING_MONEY", viewModel.startMoney.toIntOrNull() ?: 2000)
-                    putExtra("PASS_GO_MONEY", viewModel.passGoMoney.toIntOrNull() ?: 200)
-                    putExtra("JAIL_TURNS", viewModel.jailTurns.toIntOrNull() ?: 3)
-                    putExtra("TAX_PRICE", viewModel.taxesPrice.toIntOrNull() ?: 200)
-                }
-                context.startActivity(intent)
-            }
-        },
+        onExit = { onNavigateBack() },
         isAdvancedExpanded = viewModel.advancedConfigEnabled,
         startingMoney = viewModel.startMoney,
         passGoMoney = viewModel.passGoMoney,
@@ -126,7 +84,6 @@ fun ConfigContent(
     onTimerToggle: (Boolean) -> Unit,
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
-    onStartGame: () -> Unit,
     isAdvancedExpanded: Boolean,
     startingMoney: String,
     passGoMoney: String,
@@ -150,7 +107,6 @@ fun ConfigContent(
             onTimerToggle = onTimerToggle,
             onTimeLimitChange = onTimeLimitChange,
             onExit = onExit,
-            onStartGame = onStartGame,
             isAdvancedExpanded = isAdvancedExpanded,
             startingMoney = startingMoney,
             passGoMoney = passGoMoney,
@@ -174,7 +130,6 @@ fun ConfigContent(
             onTimerToggle = onTimerToggle,
             onTimeLimitChange = onTimeLimitChange,
             onExit = onExit,
-            onStartGame = onStartGame,
             isAdvancedExpanded = isAdvancedExpanded,
             startingMoney = startingMoney,
             passGoMoney = passGoMoney,
@@ -201,7 +156,6 @@ fun DrawConfigPortrait(
     onTimerToggle: (Boolean) -> Unit,
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
-    onStartGame: () -> Unit,
     isAdvancedExpanded: Boolean,
     startingMoney: String,
     passGoMoney: String,
@@ -271,14 +225,6 @@ fun DrawConfigPortrait(
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
-
-        item {
-            // Start button
-            StartGameButton(
-                isEnabled = numPlayers > 0,
-                onClick = onStartGame
-            )
-        }
     }
 }
 
@@ -293,7 +239,6 @@ fun DrawConfigLandscape(
     onTimerToggle: (Boolean) -> Unit,
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
-    onStartGame: () -> Unit,
     isAdvancedExpanded: Boolean,
     startingMoney: String,
     passGoMoney: String,
@@ -372,15 +317,6 @@ fun DrawConfigLandscape(
                         onPassGoMoneyChange = onPassGoMoneyChange,
                         onJailTurnsChange = onJailTurnsChange,
                         onTaxesPriceChange = onTaxesPriceChange,
-                    )
-                }
-
-                // Start game button
-                item {
-                    StartGameButton(
-                        isEnabled = numPlayers > 0,
-                        onClick = onStartGame,
-                        modifier = Modifier.padding(bottom = 0.dp) // No bottom padding needed in landscape
                     )
                 }
             }
@@ -669,7 +605,6 @@ fun AdvancedConfigPreview() {
                 onTimerToggle = { timerEnabled = it },
                 onTimeLimitChange = { timeText = it },
                 onExit = { },
-                onStartGame = {},
                 isAdvancedExpanded = advancedExpanded,
                 startingMoney = startingMoney,
                 passGoMoney = passGoMoney,

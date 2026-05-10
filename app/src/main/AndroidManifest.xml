@@ -12,22 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Monopoly">
         <activity
-            android:name=".ui.screens.Results"
-            android:exported="false"
-            android:label="@string/TittleGameResults"
-            android:theme="@style/Theme.Monopoly" />
-        <activity
-            android:name=".ui.screens.HelpActivity"
-            android:exported="false"
-            android:label="@string/title_activity_help"
-            android:theme="@style/Theme.Monopoly" />
-        <activity
-            android:name=".ui.screens.ConfigActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.screens.GameActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.screens.MainActivity"
             android:exported="true"
             android:label="@string/app_name"

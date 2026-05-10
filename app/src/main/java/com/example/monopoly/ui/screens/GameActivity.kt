@@ -4,16 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.media.SoundPool
-import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -31,57 +26,9 @@ import com.example.monopoly.ui.components.animations.RollDice
 import com.example.monopoly.ui.components.animations.WinnerAnimation
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.GameViewModel
-import com.example.monopoly.ui.viewmodel.GameViewModelFactory
 import game.model.Player
 import game.model.box.BoxName
 import game.model.box.GameBox
-import kotlinx.coroutines.delay
-
-class GameActivity : ComponentActivity() {
-    val viewModel: GameViewModel by viewModels {
-        // Get the intent there for pass to the view model
-        val numPlayers = intent?.getIntExtra("NUM_PLAYERS", 2) ?: 2
-        val playerNames = intent?.getStringArrayListExtra("PLAYER_NAMES") ?: arrayListOf()
-        val timerMinutes = intent?.getIntExtra("TIME_LIMIT", 0) ?: 0
-        val startMoney = intent?.getIntExtra("STARTING_MONEY", 2000) ?: 2000
-        val passGoMoney = intent?.getIntExtra("PASS_GO_MONEY", 200) ?: 200
-        val jailTurns = intent?.getIntExtra("JAIL_TURNS", 3) ?: 3
-        val taxPrice = intent?.getIntExtra("TAX_PRICE", 200) ?: 200
-
-        GameViewModelFactory(
-            application = application,
-            numPlayers = numPlayers,
-            playerNames = playerNames,
-            initialMinutes = timerMinutes,
-            startMoney = startMoney,
-            passGoMoney = passGoMoney,
-            jailTurns = jailTurns,
-            taxPrice = taxPrice
-        )
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
-        setContent {
-            MonopolyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GameScreen(
-                        viewModel = viewModel,
-                        onExit = {
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            startActivity(intent)
-                            finish()
-                        },
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
-    }
-}
 
 /**
  * Stateful version of the Game Screen.
@@ -559,13 +506,7 @@ fun DrawLandscape(
 
 
 private fun sendEndGameLog(context: Context, info: String) {
-    val intent = Intent(context, Results::class.java).apply {
-        putExtra("INFO", info)
-    }
-    context.startActivity(intent)
-
-    // Close this activity (so first we need to cast the context for do it)
-    (context as? ComponentActivity)?.finish()
+    // TODO SAVE ON MEMORY
 }
 
 @Preview(showBackground = true, widthDp = 800, heightDp = 400)

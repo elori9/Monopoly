@@ -39,35 +39,20 @@ object Constants {
     const val GITHUB_LINK = "https://github.com/elori9/Monopoly"
 }
 
-class HelpActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MonopolyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HelpScreen(modifier = Modifier.padding(innerPadding))
-                }
-            }
-        }
-    }
-}
-
 /**
  * Stateful function
  */
 @Composable
-fun HelpScreen(modifier: Modifier = Modifier) {
+fun HelpScreen(
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     var expandedImageRes by remember { mutableStateOf<Int?>(null) }
 
     Box(modifier = modifier.fillMaxSize()) {
         HelpContent(
-            onBackClick = {
-                val intent = Intent(context, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                context.startActivity(intent)
-            },
+            onBackClick = { onNavigateBack() },
             onBoxClick = { resId -> expandedImageRes = resId },
             onClickButton = {
                 Toast.makeText(
