@@ -1,10 +1,8 @@
 package com.example.monopoly.ui.screens
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.media.SoundPool
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -327,7 +325,7 @@ fun DrawPortrait(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         // Top Section: Timer, Turn Info and Exit
-        HeaderAreaPortrait(
+        GameHeaderAreaPortrait(
             secondsRemaining = secondsRemaining,
             isTimerEnabled = initialMinutes > 0,
             currentPlayerName = currentPlayerName,

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,7 +28,7 @@ import java.util.Locale
  * Stateless function: Purely visual representation of the header.
  */
 @Composable
-fun HeaderAreaPortrait(
+fun GameHeaderAreaPortrait(
     secondsRemaining: Long,
     isTimerEnabled: Boolean,
     currentPlayerName: String,
@@ -203,6 +204,35 @@ fun SmartHeaderButtons(
     )
 }
 
+/**
+ * Stateless fun for header on screens
+ */
+@Composable
+fun ScreensHeaderArea(onExit: () -> Unit, modifier: Modifier, title: String) {
+    Column {
+        Row(
+            modifier = modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = title,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+            IconButton(onClick = onExit) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Exit",
+                    tint = Color.Red,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+        HorizontalDivider(thickness = 2.dp, color = Color.Black)
+    }
+}
+
 
 /**
  * Utility to format seconds to hh:mm:ss
@@ -217,9 +247,9 @@ private fun formatTime(seconds: Long): String {
 
 @Preview(showBackground = true, widthDp = 600)
 @Composable
-fun HeaderAreaPortraitPreview() {
+fun GameHeaderAreaPortraitPreview() {
     MonopolyTheme {
-        HeaderAreaPortrait(
+        GameHeaderAreaPortrait(
             secondsRemaining = 900L,
             isTimerEnabled = true,
             currentPlayerName = "Player 1",

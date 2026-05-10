@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
 import com.example.monopoly.ui.viewmodel.GameViewModel
 import com.example.monopoly.ui.viewmodel.GameViewModelFactory
+import com.example.monopoly.ui.viewmodel.OtherGamesViewModel
 import com.example.monopoly.ui.viewmodel.ResultsViewModel
 
 enum class MenuScreens(@param:StringRes val title: Int) {
@@ -21,7 +22,8 @@ enum class MenuScreens(@param:StringRes val title: Int) {
     NewGame(title = R.string.NewGame),
     Config(title = R.string.Configuration),
     Help(title = R.string.Help),
-    Results(title = R.string.TittleGameResults)
+    Results(title = R.string.TittleGameResults),
+    OtherGames(title = R.string.OtherGames)
 }
 
 
@@ -43,6 +45,7 @@ fun AppNavigation() {
                 onNavigateToConfig = { navController.navigate(MenuScreens.Config.name) },
                 onNavigateToNewGame = { navController.navigate(MenuScreens.NewGame.name) },
                 onNavigateToHelp = { navController.navigate(MenuScreens.Help.name) },
+                onNavigateToOtherGames = { navController.navigate(MenuScreens.OtherGames.name) },
                 onExit = {
                     (context as? Activity)?.finish()
                 },
@@ -88,6 +91,7 @@ fun AppNavigation() {
                 },
             )
         }
+
         // Results
         composable(MenuScreens.Results.name) {
             val resultsViewModel: ResultsViewModel = viewModel()
@@ -102,6 +106,16 @@ fun AppNavigation() {
                 },
                 onExit = { (context as? Activity)?.finish() },
                 modifier = Modifier,
+            )
+        }
+
+        // Get other games info
+        composable(MenuScreens.OtherGames.name) {
+            val otherGamesViewModel: OtherGamesViewModel = viewModel()
+
+            OtherGamesScreen(
+                modifier = Modifier,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

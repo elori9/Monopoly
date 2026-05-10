@@ -35,6 +35,7 @@ fun MenuScreen(
     onNavigateToConfig: () -> Unit,
     onNavigateToHelp: () -> Unit,
     onNavigateToNewGame: () -> Unit,
+    onNavigateToOtherGames: () -> Unit,
     onExit: () -> Unit
 ) {
     val isPortrait =
@@ -46,6 +47,7 @@ fun MenuScreen(
                 modifier = Modifier.padding(innerPadding),
                 onNewGameClick = onNavigateToNewGame,
                 onHelpClick = onNavigateToHelp,
+                onOtherGamesClick = onNavigateToOtherGames,
                 onExitClick = onExit,
                 onConfigClick = onNavigateToConfig
             )
@@ -54,6 +56,7 @@ fun MenuScreen(
                 modifier = Modifier.padding(innerPadding),
                 onNewGameClick = onNavigateToNewGame,
                 onHelpClick = onNavigateToHelp,
+                onOtherGamesClick = onNavigateToOtherGames,
                 onExitClick = onExit,
                 onConfigClick = onNavigateToConfig
             )
@@ -70,8 +73,9 @@ fun MainMenuScreenPortrait(
     modifier: Modifier = Modifier,
     onNewGameClick: () -> Unit,
     onHelpClick: () -> Unit,
+    onOtherGamesClick: () -> Unit,
     onExitClick: () -> Unit,
-    onConfigClick: () -> Unit = {}
+    onConfigClick: () -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // Background
@@ -120,6 +124,7 @@ fun MainMenuScreenPortrait(
                 modifier = buttonModifier,
                 onNewGameClick = onNewGameClick,
                 onHelpClick = onHelpClick,
+                onOtherGamesClick = onOtherGamesClick,
                 onExitClick = onExitClick
             )
         }
@@ -134,8 +139,9 @@ fun MainMenuScreenLandscape(
     modifier: Modifier = Modifier,
     onNewGameClick: () -> Unit,
     onHelpClick: () -> Unit,
+    onOtherGamesClick: () -> Unit,
     onExitClick: () -> Unit,
-    onConfigClick: () -> Unit = {}
+    onConfigClick: () -> Unit
 ) {
     Box(modifier = modifier.fillMaxSize()) {
         // Background
@@ -185,6 +191,7 @@ fun MainMenuScreenLandscape(
                 modifier = buttonModifier,
                 onNewGameClick = onNewGameClick,
                 onHelpClick = onHelpClick,
+                onOtherGamesClick = onOtherGamesClick,
                 onExitClick = onExitClick
             )
         }
@@ -199,6 +206,7 @@ fun Buttons(
     modifier: Modifier,
     onNewGameClick: () -> Unit,
     onHelpClick: () -> Unit,
+    onOtherGamesClick: () -> Unit,
     onExitClick: () -> Unit
 ) {
 
@@ -229,6 +237,19 @@ fun Buttons(
     }
 
     Button(
+        onClick = onOtherGamesClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF03A9F4))
+    ) {
+        Text(
+            text = stringResource(R.string.OtherGames),
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+
+    Button(
         onClick = onExitClick,
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
@@ -240,6 +261,7 @@ fun Buttons(
             fontWeight = FontWeight.Bold
         )
     }
+
 }
 
 
@@ -250,6 +272,8 @@ fun MainMenuPreview() {
         MainMenuScreenPortrait(
             onNewGameClick = {},
             onHelpClick = {},
+            onOtherGamesClick = {},
+            onConfigClick = {},
             onExitClick = {}
         )
     }

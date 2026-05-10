@@ -8,8 +8,6 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopoly.R
+import com.example.monopoly.ui.components.ScreensHeaderArea
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
 
@@ -184,7 +183,11 @@ fun DrawConfigPortrait(
     ) {
         // Header
         item {
-            ConfigHeader(onExit = onExit)
+            ScreensHeaderArea(
+                onExit = onExit,
+                modifier = Modifier,
+                title = stringResource(id = R.string.Configuration)
+            )
             Spacer(modifier = Modifier.height(24.dp))
         }
 
@@ -270,7 +273,11 @@ fun DrawConfigLandscape(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        ConfigHeader(onExit = onExit)
+        ScreensHeaderArea(
+            onExit = onExit,
+            modifier = Modifier,
+            title = stringResource(id = R.string.Configuration)
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
@@ -340,33 +347,6 @@ fun DrawConfigLandscape(
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun ConfigHeader(onExit: () -> Unit) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(id = R.string.Configuration),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = onExit) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Exit",
-                    tint = Color.Red,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-        }
-        HorizontalDivider(thickness = 2.dp, color = Color.Black)
     }
 }
 

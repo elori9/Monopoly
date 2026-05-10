@@ -12,7 +12,6 @@ import com.example.monopoly.data.DataStoreManager
 import kotlinx.coroutines.launch
 
 class ConfigActivityViewModel(application: Application) : AndroidViewModel(application) {
-
     private val dataStoreManager = DataStoreManager(application)
 
     init {
@@ -21,13 +20,13 @@ class ConfigActivityViewModel(application: Application) : AndroidViewModel(appli
                 // Only update if it's the first load or if you want it to always reflect datastore
                 // Flow emits the current state immediately upon subscription
                 numPlayers = if (preferences.numPlayers == 0) 4 else preferences.numPlayers
-                
+
                 playersNamesList.clear()
                 playersNamesList.addAll(preferences.playerNames)
                 while (playersNamesList.size < 4) {
                     playersNamesList.add("P${playersNamesList.size + 1}")
                 }
-                
+
                 isTimerEnabled = preferences.isTimerEnabled
                 timeLimitText = preferences.timeLimitText
                 advancedConfigEnabled = preferences.advancedConfigEnabled
