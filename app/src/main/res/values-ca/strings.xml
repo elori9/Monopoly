@@ -88,4 +88,6 @@
     <string name="ConfSaved">Configuració guardada</string>
     <string name="Save">Guardar</string>
     <string name="OtherGames">Altres partides</string>
+    <string name="StartingMusic">Començant la música</string>
+    <string name="StoppingMusic">Parant la música</string>
 </resources>
