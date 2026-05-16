@@ -87,6 +87,7 @@
     <string name="Cancel">Cancelar</string>
     <string name="ConfSaved">Configuración guardada</string>
     <string name="Save">Guardar</string>
+    <string name="GameLogTitle">Registro del juego</string>
     <string name="OtherGames">Otras partidas</string>
     <string name="StartingMusic">Empezando la música</string>
     <string name="StoppingMusic">Parando la música</string>

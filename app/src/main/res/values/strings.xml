@@ -87,6 +87,7 @@
     <string name="Cancel">Cancel</string>
     <string name="ConfSaved">Configuration saved</string>
     <string name="Save">Save</string>
+    <string name="GameLogTitle">Game Log</string>
     <string name="OtherGames">Other Games</string>
     <string name="StartingMusic">Starting Music</string>
     <string name="StoppingMusic">Stopping Music</string>

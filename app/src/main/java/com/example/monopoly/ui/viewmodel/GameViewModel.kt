@@ -51,6 +51,7 @@ class GameViewModel(
         private set
     var logBuilder by mutableStateOf("")
         private set
+    val logEntries = mutableStateListOf<String>()
     var secondsRemaining by mutableLongStateOf(initialMinutes.toLong() * 60L)
         private set
 
@@ -361,6 +362,7 @@ class GameViewModel(
      */
     private fun addLog(message: String) {
         logBuilder += "$message\n"
+        logEntries.add(message)
     }
 }
 
