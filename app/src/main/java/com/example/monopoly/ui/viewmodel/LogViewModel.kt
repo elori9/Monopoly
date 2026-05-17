@@ -2,10 +2,8 @@ package com.example.monopoly.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.example.monopoly.data.LogEntity
 import com.example.monopoly.data.LogRepository
-import kotlinx.coroutines.launch
 
 class LogViewModel(private val repository: LogRepository) : ViewModel() {
     val allLogs = repository.allLogs
