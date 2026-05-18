@@ -38,6 +38,7 @@ class GameViewModel(
     private val jailTurns: Int,
     private val taxPrice: Int
 ) : GameView, AndroidViewModel(application) {
+    private val context = application
 
     // State vars
     val playersState = mutableStateListOf<Player>()
@@ -119,7 +120,6 @@ class GameViewModel(
         playersState.addAll(players)
 
         // Start the log
-        val context = getApplication<Application>()
         addLog(context.getString(R.string.LogTittle))
         addLog("${context.getString(R.string.LogNumPlayers)} $numPlayers")
         addLog("${context.getString(R.string.LogNamePlayers)} ${playerNames.joinToString(", ")}")
@@ -189,8 +189,6 @@ class GameViewModel(
 
     @SuppressLint("StringFormatMatches")
     override fun showMessage(type: MessageType, vararg extraInfo: String) {
-        val context = getApplication<Application>()
-
         val parsedText: String = when (type) {
             MessageType.RENT_PAID -> context.getString(R.string.MsgRentPaid, *extraInfo)
             MessageType.PROPERTY_BOUGHT -> context.getString(R.string.MsgPropertyBought, *extraInfo)
@@ -254,7 +252,6 @@ class GameViewModel(
     }
 
     override fun showDiceRoll(playerName: String, roll: Int) {
-        val context = getApplication<Application>()
         gameMessage = context.getString(R.string.ShowDiceRollMessage, playerName, roll)
         dice = roll
         // Select the sound
@@ -275,7 +272,6 @@ class GameViewModel(
     }
 
     override fun showBankrupt(playerName: String) {
-        val context = getApplication<Application>()
         gameMessage = context.getString(R.string.ShowBankruptMessage, playerName)
     }
 
@@ -312,7 +308,6 @@ class GameViewModel(
     }
 
     override fun showGameOver(winner: Player) {
-        val context = getApplication<Application>()
         this.winner = winner
         gameMessage = context.getString(R.string.WinnerShowMessage, winner.name)
         addLog("${context.getString(R.string.LogWinner)} ${winner.name}")
