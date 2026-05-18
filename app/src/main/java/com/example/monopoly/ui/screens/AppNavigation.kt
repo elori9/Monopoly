@@ -12,9 +12,12 @@ import android.app.Application
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.monopoly.data.LogApplication
 import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
 import com.example.monopoly.ui.viewmodel.GameViewModel
 import com.example.monopoly.ui.viewmodel.GameViewModelFactory
+import com.example.monopoly.ui.viewmodel.LogViewModel
+import com.example.monopoly.ui.viewmodel.LogViewModelFactory
 import com.example.monopoly.ui.viewmodel.OtherGamesViewModel
 import com.example.monopoly.ui.viewmodel.ResultsViewModel
 
@@ -92,6 +95,9 @@ fun AppNavigation() {
                     // Clean history and go back
                     navController.popBackStack(MenuScreens.Start.name, inclusive = false)
                 },
+                onResults = {
+                    navController.navigate(MenuScreens.Results.name)
+                },
             )
         }
 
@@ -99,14 +105,20 @@ fun AppNavigation() {
         composable(MenuScreens.Results.name) {
             val resultsViewModel: ResultsViewModel = viewModel()
 
+            val app = context.applicationContext as LogApplication
+
+            val logViewModel: LogViewModel = viewModel(
+                factory = LogViewModelFactory(app.repository)
+            )
+
             ResultsScreen(
-                logInfo = resultsViewModel.logInfo,
                 onNewGame = {
                     // Clean the stack and go back to start
-                    navController.navigate(MenuScreens.Config.name) {
+                    navController.navigate(MenuScreens.NewGame.name) {
                         popUpTo(MenuScreens.Start.name) { inclusive = false }
                     }
                 },
+                logViewModel = logViewModel,
                 onExit = { (context as? Activity)?.finish() },
                 modifier = Modifier,
             )

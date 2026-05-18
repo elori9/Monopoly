@@ -49,19 +49,23 @@ import java.util.Locale
 import androidx.core.net.toUri
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopoly.ui.viewmodel.ResultsViewModel
+import com.example.monopoly.ui.viewmodel.LogViewModel
+
 
 @Composable
 fun ResultsScreen(
-    logInfo: String,
     viewModel: ResultsViewModel = viewModel(),
     onNewGame: () -> Unit,
     onExit: () -> Unit,
+    logViewModel: LogViewModel,
     modifier: Modifier
 ) {
     val context = LocalContext.current
@@ -73,6 +77,12 @@ fun ResultsScreen(
 
     val isPortrait =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT
+
+    val logs by logViewModel.allLogs.collectAsStateWithLifecycle(initialValue = emptyList())
+    // Get this game log
+    val logInfo = logs.firstOrNull()?.let { log ->
+        "${log.date} - ${log.winnerName} - ${log.durationMinutes}"
+    } ?: ""
 
     val onSendEmail = {
         {
@@ -400,17 +410,16 @@ fun ColumnScope.ButtonsArea(onSendEmail: () -> Unit, onNewGame: () -> Unit, onEx
 @Composable
 fun ResultsPreview() {
     MonopolyTheme {
-        ResultsScreen(
-            logInfo = "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo" +
-                    "infoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfoinfo",
+        ResultsScreenPortrait(
+            logInfo = "infoinfoifnoinfoinfoifnoinfoinfoinfoifnoinfoinfoifnoinfo" +
+                    "infoinfoifnoinfoinfoifnoinfoinfoinfoifnoinfoinfoifnoinfo" +
+                    "infoinfoifnoinfoinfoifnoinfoinfoinfoifnoinfoinfoifnoinfo" +
+                    "infoinfoifnoinfoinfoifnoinfoinfoinfoifnoinfoinfoifnoinfo",
+            date = "Oct 25, 2023 10:30:00 AM",
+            emailValue = "",
+            scrollState = rememberScrollState(),
+            onEmailChange = {},
+            onSendEmail = {},
             onNewGame = {},
             onExit = {},
             modifier = Modifier

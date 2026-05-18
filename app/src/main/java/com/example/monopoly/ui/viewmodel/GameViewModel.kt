@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.monopoly.R
+import com.example.monopoly.data.LogApplication
+import com.example.monopoly.data.LogEntity
 import game.controller.GameController
 import game.interfaces.GameView
 import game.model.Board
@@ -26,6 +28,10 @@ import game.model.MessageType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.monopoly.ui.components.Sounds
+import kotlinx.coroutines.Dispatchers
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class GameViewModel(
@@ -327,6 +333,23 @@ class GameViewModel(
         // Show the animation and play the sound
         showWinnerAnimation = true
         soundTrigger = Sounds.WIN
+
+        // Save the data of the game
+        viewModelScope.launch(Dispatchers.IO) {
+            val repository = (context.applicationContext as LogApplication).repository
+            val playedMinutes = initialMinutes - (secondsRemaining / 60).toInt()
+            val currentDate =
+                SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+
+            val log = LogEntity(
+                date = currentDate,
+                winnerName = winner.name,
+                totalTurns = controller.turn,
+                durationMinutes = if (initialMinutes > 0) playedMinutes else 0
+            )
+
+            repository.insertLog(log)
+        }
 
         // Count 3 seconds and then go to the results
         viewModelScope.launch {

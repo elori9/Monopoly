@@ -54,6 +54,7 @@ import game.model.box.Property
 fun GameScreen(
     viewModel: GameViewModel,
     onExit: () -> Unit,
+    onResults: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -106,8 +107,8 @@ fun GameScreen(
     // Send the end message if is a winner
     LaunchedEffect(viewModel.goToGameResults) {
         if (viewModel.goToGameResults) {
-            // Send log
-            sendEndGameLog(context, viewModel.logBuilder)
+            // Close the game
+            onResults()
         }
     }
 
@@ -719,11 +720,6 @@ fun DrawLandscape(
             }
         }
     }
-}
-
-
-private fun sendEndGameLog(context: Context, info: String) {
-    // TODO SAVE ON MEMORY
 }
 
 @Preview(showBackground = true, widthDp = 1920, heightDp = 1080)
