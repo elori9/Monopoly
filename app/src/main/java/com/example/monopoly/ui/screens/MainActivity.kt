@@ -16,6 +16,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MonopolyTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
+                    // App navigation
                     AppNavigation()
                 }
             }
