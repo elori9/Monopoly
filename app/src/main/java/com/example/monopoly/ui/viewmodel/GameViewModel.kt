@@ -41,18 +41,26 @@ class GameViewModel(
     private val context = application
 
     // State vars
-    val playersState = mutableStateListOf<Player>()
+    private val _playersState = mutableStateListOf<Player>()
+    val playersState: List<Player> get() = _playersState
     var currentPlayerMoney by mutableIntStateOf(0)
+        private set
     var gameMessage by mutableStateOf("")
+        private set
     var dice by mutableStateOf<Int?>(null)
+        private set
     var currentPlayer by mutableStateOf<Player?>(null)
+        private set
     var showBuildDialog by mutableStateOf(false)
+        private set
     var buildOptions by mutableStateOf<List<Property>>(emptyList())
+        private set
     var winner by mutableStateOf<Player?>(null)
         private set
     var logBuilder by mutableStateOf("")
         private set
-    val logEntries = mutableStateListOf<String>()
+    private val _logEntries = mutableStateListOf<String>()
+    val logEntries: List<String> get() = _logEntries
     var secondsRemaining by mutableLongStateOf(initialMinutes.toLong() * 60L)
         private set
 
@@ -91,9 +99,13 @@ class GameViewModel(
 
     // Those will be the callbacks
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
+        private set
     var buyProperty: ((Boolean) -> Unit)? by mutableStateOf(null)
+        private set
     var endTurnAction: (() -> Unit)? by mutableStateOf(null)
-    private var onHouseSelectedCallback: ((Property?) -> Unit)? = null
+        private set
+    var onHouseSelectedCallback: ((Property?) -> Unit)? = null
+        private set
 
 
     // Flags for buttons activation
@@ -117,7 +129,7 @@ class GameViewModel(
         val players = playerNames.mapIndexed { index, name ->
             Player(id = index, name = name, money = startMoney)
         }
-        playersState.addAll(players)
+        _playersState.addAll(players)
 
         // Start the log
         addLog(context.getString(R.string.LogTittle))
@@ -348,7 +360,7 @@ class GameViewModel(
     private fun triggerPlayerRecomposition(playerId: Int) {
         val index = playersState.indexOfFirst { it.id == playerId }
         if (index != -1) {
-            playersState[index] = playersState[index]
+            _playersState[index] = playersState[index]
         }
     }
 
@@ -357,7 +369,7 @@ class GameViewModel(
      */
     private fun addLog(message: String) {
         logBuilder += "$message\n"
-        logEntries.add(message)
+        _logEntries.add(message)
     }
 }
 
