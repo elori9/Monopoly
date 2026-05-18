@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,6 +44,7 @@ import com.example.monopoly.ui.viewmodel.GameViewModel
 import game.model.Player
 import game.model.box.BoxName
 import game.model.box.GameBox
+import game.model.box.Property
 
 /**
  * Stateful version of the Game Screen.
@@ -281,7 +281,7 @@ fun GameContent(
 
     // Check if the detail pane is visible (tablet bi-panel mode)
     val isDetailVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail] ==
-        PaneAdaptedValue.Expanded
+            PaneAdaptedValue.Expanded
 
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
@@ -726,10 +726,14 @@ private fun sendEndGameLog(context: Context, info: String) {
     // TODO SAVE ON MEMORY
 }
 
-@Preview(showBackground = true, widthDp = 800, heightDp = 400)
+@Preview(showBackground = true, widthDp = 1920, heightDp = 1080)
 @Composable
 fun GameScreenLandscapePreview() {
     MonopolyTheme {
+        val dummyBoxes = listOf(
+            Property(position = 0, name = "Tomato Town", price = 200, rent = 20, housePrice = 50)
+        )
+
 
         GameContent(
             isPortrait = false,
@@ -737,10 +741,11 @@ fun GameScreenLandscapePreview() {
             secondsRemaining = 3600L,
             onExit = {},
 
-            topGameBoxes = emptyList(),
-            bottomGameBoxes = emptyList(),
-            leftGameBoxes = emptyList(),
-            rightGameBoxes = emptyList(),
+
+            topGameBoxes = dummyBoxes,
+            bottomGameBoxes = dummyBoxes,
+            leftGameBoxes = dummyBoxes,
+            rightGameBoxes = dummyBoxes,
 
             allPlayers = listOf(
                 Player(id = 0, name = "p1", money = 1500),
