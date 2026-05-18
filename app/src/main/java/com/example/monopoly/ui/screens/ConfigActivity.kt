@@ -22,7 +22,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopoly.R
 import com.example.monopoly.ui.components.ScreensHeaderArea
 import com.example.monopoly.ui.theme.MonopolyTheme
@@ -34,7 +33,7 @@ import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
 @Composable
 fun ConfigScreen(
     modifier: Modifier = Modifier,
-    viewModel: ConfigActivityViewModel = viewModel(),
+    viewModel: ConfigActivityViewModel,
     onNavigateBack: () -> Unit,
 ) {
     val context = LocalContext.current

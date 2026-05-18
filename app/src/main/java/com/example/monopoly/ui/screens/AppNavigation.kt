@@ -10,6 +10,7 @@ import com.example.monopoly.R
 import android.app.Activity
 import android.app.Application
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
 import com.example.monopoly.ui.viewmodel.GameViewModel
@@ -33,7 +34,9 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val application = context.applicationContext as Application
 
-    val configViewModel: ConfigActivityViewModel = viewModel()
+    // Factory for the db store
+    val factory = ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+    val configViewModel: ConfigActivityViewModel = viewModel(factory = factory)
 
     NavHost(
         navController = navController,
