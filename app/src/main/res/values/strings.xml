@@ -89,6 +89,14 @@
     <string name="Save">Save</string>
     <string name="GameLogTitle">Game Log</string>
     <string name="OtherGames">Other Games</string>
+    <string name="GameDetailTitle">Game details …</string>
+    <string name="GameDetailWinner">Winner: %1$s</string>
+    <string name="GameDetailTurns">Turns: %1$d</string>
+    <string name="GameDetailDuration">Duration: %1$d min</string>
+    <string name="GameDetailDate">Date: %1$s</string>
+    <string name="SelectGamePrompt">Select a game to see details</string>
+    <string name="ViewDetailAction">View details</string>
+    <string name="ViewListAction">View list</string>
     <string name="StartingMusic">Starting Music</string>
     <string name="StoppingMusic">Stopping Music</string>
 </resources>
