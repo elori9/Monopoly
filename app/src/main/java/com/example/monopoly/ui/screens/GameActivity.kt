@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.example.monopoly.R
 import com.example.monopoly.ui.components.*
 import com.example.monopoly.ui.components.animations.RollDice
@@ -267,9 +268,12 @@ fun GameContent(
     // Use ListDetailPaneScaffold for adaptive bi-panel layout
     // On tablets: detailPane (wider) = game, listPane (narrower) = log
     // On smartphones: only listPane is shown (mono-panel), so we put the game there too
-    val baseDirective = calculatePaneScaffoldDirective(currentWindowAdaptiveInfo())
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+    val baseDirective = calculatePaneScaffoldDirective(adaptiveInfo)
+    val isTablet = adaptiveInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+
     val customDirective = PaneScaffoldDirective(
-        maxHorizontalPartitions = baseDirective.maxHorizontalPartitions,
+        maxHorizontalPartitions = if (isTablet) 2 else 1,
         horizontalPartitionSpacerSize = 0.dp,
         maxVerticalPartitions = baseDirective.maxVerticalPartitions,
         verticalPartitionSpacerSize = 0.dp,
