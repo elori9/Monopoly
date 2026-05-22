@@ -9,5 +9,6 @@ data class LogEntity(
     val date: String,
     val winnerName: String,
     val totalTurns: Int,
-    val durationMinutes: Int
+    val durationMinutes: Int,
+    val logLine: String,
 )

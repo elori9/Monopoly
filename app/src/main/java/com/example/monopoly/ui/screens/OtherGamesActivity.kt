@@ -315,6 +315,7 @@ fun OtherGamesPreview() {
             winnerName = "Jugador 1",
             totalTurns = 20,
             durationMinutes = 45,
+            logLine = "LOG"
         ),
         LogEntity(
             id = 2,
@@ -322,6 +323,7 @@ fun OtherGamesPreview() {
             winnerName = "Jugador 2",
             totalTurns = 35,
             durationMinutes = 60,
+            logLine = "LOG"
         )
     )
 
@@ -342,6 +344,7 @@ fun OtherGamesTabletPreview() {
             winnerName = "Jugador 1",
             totalTurns = 20,
             durationMinutes = 45,
+            logLine = "LOG"
         ),
         LogEntity(
             id = 2,
@@ -349,6 +352,7 @@ fun OtherGamesTabletPreview() {
             winnerName = "Jugador 2",
             totalTurns = 35,
             durationMinutes = 60,
+            logLine = "LOG"
         )
     )
 

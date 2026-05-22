@@ -81,7 +81,7 @@ fun ResultsScreen(
     val logs by logViewModel.allLogs.collectAsStateWithLifecycle(initialValue = emptyList())
     // Get this game log
     val logInfo = logs.firstOrNull()?.let { log ->
-        "${log.date} - ${log.winnerName} - ${log.durationMinutes}"
+        "${log.date} - ${log.winnerName} - ${log.durationMinutes}:\n${log.logLine}"
     } ?: ""
 
     val onSendEmail = {
@@ -382,7 +382,7 @@ fun ColumnScope.ButtonsArea(onSendEmail: () -> Unit, onNewGame: () -> Unit, onEx
         Spacer(modifier = Modifier.width(10.dp))
 
         // Text
-        Text(stringResource(R.string.ButtonNewGame), fontSize = 18.sp)
+        Text(stringResource(R.string.ButtonMenu), fontSize = 18.sp)
     }
     Spacer(modifier = Modifier.height(4.dp))
 

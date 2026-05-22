@@ -345,7 +345,8 @@ class GameViewModel(
                 date = currentDate,
                 winnerName = winner.name,
                 totalTurns = controller.turn,
-                durationMinutes = if (initialMinutes > 0) playedMinutes else 0
+                durationMinutes = if (initialMinutes > 0) playedMinutes else 0,
+                logLine = logBuilder
             )
 
             repository.insertLog(log)

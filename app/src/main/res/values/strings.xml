@@ -99,4 +99,5 @@
     <string name="ViewListAction">View list</string>
     <string name="StartingMusic">Starting Music</string>
     <string name="StoppingMusic">Stopping Music</string>
+    <string name="ButtonMenu">Return to menu</string>
 </resources>
