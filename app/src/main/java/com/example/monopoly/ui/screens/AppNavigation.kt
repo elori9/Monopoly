@@ -114,7 +114,7 @@ fun AppNavigation() {
             ResultsScreen(
                 onNewGame = {
                     // Clean the stack and go back to start
-                    navController.navigate(MenuScreens.NewGame.name) {
+                    navController.navigate(MenuScreens.Start.name) {
                         popUpTo(MenuScreens.Start.name) { inclusive = false }
                     }
                 },
