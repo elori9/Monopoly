@@ -15,6 +15,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.monopoly.R
+import com.example.monopoly.data.LogApplication
+import com.example.monopoly.data.LogEntity
 import game.controller.GameController
 import game.interfaces.GameView
 import game.model.Board
@@ -26,6 +28,10 @@ import game.model.MessageType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.example.monopoly.ui.components.Sounds
+import kotlinx.coroutines.Dispatchers
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 class GameViewModel(
@@ -38,19 +44,29 @@ class GameViewModel(
     private val jailTurns: Int,
     private val taxPrice: Int
 ) : GameView, AndroidViewModel(application) {
+    private val context = application
 
     // State vars
-    val playersState = mutableStateListOf<Player>()
+    private val _playersState = mutableStateListOf<Player>()
+    val playersState: List<Player> get() = _playersState
     var currentPlayerMoney by mutableIntStateOf(0)
+        private set
     var gameMessage by mutableStateOf("")
+        private set
     var dice by mutableStateOf<Int?>(null)
+        private set
     var currentPlayer by mutableStateOf<Player?>(null)
+        private set
     var showBuildDialog by mutableStateOf(false)
+        private set
     var buildOptions by mutableStateOf<List<Property>>(emptyList())
+        private set
     var winner by mutableStateOf<Player?>(null)
         private set
     var logBuilder by mutableStateOf("")
         private set
+    private val _logEntries = mutableStateListOf<String>()
+    val logEntries: List<String> get() = _logEntries
     var secondsRemaining by mutableLongStateOf(initialMinutes.toLong() * 60L)
         private set
 
@@ -89,9 +105,13 @@ class GameViewModel(
 
     // Those will be the callbacks
     var turnAction: ((TurnAction) -> Unit)? by mutableStateOf(null)
+        private set
     var buyProperty: ((Boolean) -> Unit)? by mutableStateOf(null)
+        private set
     var endTurnAction: (() -> Unit)? by mutableStateOf(null)
-    private var onHouseSelectedCallback: ((Property?) -> Unit)? = null
+        private set
+    var onHouseSelectedCallback: ((Property?) -> Unit)? = null
+        private set
 
 
     // Flags for buttons activation
@@ -115,10 +135,9 @@ class GameViewModel(
         val players = playerNames.mapIndexed { index, name ->
             Player(id = index, name = name, money = startMoney)
         }
-        playersState.addAll(players)
+        _playersState.addAll(players)
 
         // Start the log
-        val context = getApplication<Application>()
         addLog(context.getString(R.string.LogTittle))
         addLog("${context.getString(R.string.LogNumPlayers)} $numPlayers")
         addLog("${context.getString(R.string.LogNamePlayers)} ${playerNames.joinToString(", ")}")
@@ -188,8 +207,6 @@ class GameViewModel(
 
     @SuppressLint("StringFormatMatches")
     override fun showMessage(type: MessageType, vararg extraInfo: String) {
-        val context = getApplication<Application>()
-
         val parsedText: String = when (type) {
             MessageType.RENT_PAID -> context.getString(R.string.MsgRentPaid, *extraInfo)
             MessageType.PROPERTY_BOUGHT -> context.getString(R.string.MsgPropertyBought, *extraInfo)
@@ -253,7 +270,6 @@ class GameViewModel(
     }
 
     override fun showDiceRoll(playerName: String, roll: Int) {
-        val context = getApplication<Application>()
         gameMessage = context.getString(R.string.ShowDiceRollMessage, playerName, roll)
         dice = roll
         // Select the sound
@@ -274,7 +290,6 @@ class GameViewModel(
     }
 
     override fun showBankrupt(playerName: String) {
-        val context = getApplication<Application>()
         gameMessage = context.getString(R.string.ShowBankruptMessage, playerName)
     }
 
@@ -311,7 +326,6 @@ class GameViewModel(
     }
 
     override fun showGameOver(winner: Player) {
-        val context = getApplication<Application>()
         this.winner = winner
         gameMessage = context.getString(R.string.WinnerShowMessage, winner.name)
         addLog("${context.getString(R.string.LogWinner)} ${winner.name}")
@@ -319,6 +333,24 @@ class GameViewModel(
         // Show the animation and play the sound
         showWinnerAnimation = true
         soundTrigger = Sounds.WIN
+
+        // Save the data of the game
+        viewModelScope.launch(Dispatchers.IO) {
+            val repository = (context.applicationContext as LogApplication).repository
+            val playedMinutes = initialMinutes - (secondsRemaining / 60).toInt()
+            val currentDate =
+                SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date())
+
+            val log = LogEntity(
+                date = currentDate,
+                winnerName = winner.name,
+                totalTurns = controller.turn,
+                durationMinutes = if (initialMinutes > 0) playedMinutes else 0,
+                logLine = logBuilder
+            )
+
+            repository.insertLog(log)
+        }
 
         // Count 3 seconds and then go to the results
         viewModelScope.launch {
@@ -352,7 +384,7 @@ class GameViewModel(
     private fun triggerPlayerRecomposition(playerId: Int) {
         val index = playersState.indexOfFirst { it.id == playerId }
         if (index != -1) {
-            playersState[index] = playersState[index]
+            _playersState[index] = playersState[index]
         }
     }
 
@@ -361,6 +393,7 @@ class GameViewModel(
      */
     private fun addLog(message: String) {
         logBuilder += "$message\n"
+        _logEntries.add(message)
     }
 }
 

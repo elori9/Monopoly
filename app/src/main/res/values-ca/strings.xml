@@ -85,4 +85,20 @@
     <string name="MsgStartGame">La partida ha començat, P1 pot començar a tirar els daus</string>
     <string name="SelectWhereBuild">Selecciona on construir</string>
     <string name="Cancel">Cancel·lar</string>
+    <string name="ConfSaved">Configuració guardada</string>
+    <string name="Save">Guardar</string>
+    <string name="GameLogTitle">Registre del joc</string>
+    <string name="OtherGames">Altres partides</string>
+    <string name="GameDetailTitle">Detalls de la partida …</string>
+    <string name="GameDetailWinner">Guanyador: %1$s</string>
+    <string name="GameDetailTurns">Torns: %1$d</string>
+    <string name="GameDetailDuration">Durada: %1$d min</string>
+    <string name="GameDetailDate">Data: %1$s</string>
+    <string name="SelectGamePrompt">Selecciona una partida per veure els detalls</string>
+    <string name="ViewDetailAction">Veure detalls</string>
+    <string name="ViewListAction">Veure llista</string>
+    <string name="StartingMusic">Començant la música</string>
+    <string name="StoppingMusic">Parant la música</string>
+    <string name="ButtonMenu">Tornar al menu</string>
+
 </resources>

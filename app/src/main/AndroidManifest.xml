@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".data.LogApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -10,23 +11,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Monopoly">
-        <activity
-            android:name=".ui.screens.Results"
-            android:exported="false"
-            android:label="@string/TittleGameResults"
-            android:theme="@style/Theme.Monopoly" />
-        <activity
-            android:name=".ui.screens.HelpActivity"
-            android:exported="false"
-            android:label="@string/title_activity_help"
-            android:theme="@style/Theme.Monopoly" />
-        <activity
-            android:name=".ui.screens.ConfigActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.screens.GameActivity"
-            android:exported="false" />
+        android:theme="@style/Theme.Monopoly"
+        tools:ignore="Instantiatable">
         <activity
             android:name=".ui.screens.MainActivity"
             android:exported="true"
@@ -38,6 +24,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".ui.broadcastreceivers.MusicBroadcast" />
+        <service android:name=".ui.services.MusicService" />
     </application>
 
 </manifest>

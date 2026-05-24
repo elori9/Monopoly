@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.devtools.ksp") version "2.0.21-1.0.27"
 }
 
 android {
@@ -62,6 +63,15 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.11.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.material3.adaptive)
+    implementation(libs.androidx.material3.adaptive.layout)
+    implementation(libs.androidx.material3.adaptive.navigation)
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    ksp("androidx.room:room-compiler:2.8.4")
 }
 
 tasks.withType<Test> {

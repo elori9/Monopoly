@@ -1,87 +1,51 @@
 package com.example.monopoly.ui.screens
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
 import android.media.SoundPool
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.PaneAdaptedValue
+import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.example.monopoly.R
 import com.example.monopoly.ui.components.*
 import com.example.monopoly.ui.components.animations.RollDice
 import com.example.monopoly.ui.components.animations.WinnerAnimation
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.GameViewModel
-import com.example.monopoly.ui.viewmodel.GameViewModelFactory
 import game.model.Player
 import game.model.box.BoxName
 import game.model.box.GameBox
-import kotlinx.coroutines.delay
-
-class GameActivity : ComponentActivity() {
-    val viewModel: GameViewModel by viewModels {
-        // Get the intent there for pass to the view model
-        val numPlayers = intent?.getIntExtra("NUM_PLAYERS", 2) ?: 2
-        val playerNames = intent?.getStringArrayListExtra("PLAYER_NAMES") ?: arrayListOf()
-        val timerMinutes = intent?.getIntExtra("TIME_LIMIT", 0) ?: 0
-        val startMoney = intent?.getIntExtra("STARTING_MONEY", 2000) ?: 2000
-        val passGoMoney = intent?.getIntExtra("PASS_GO_MONEY", 200) ?: 200
-        val jailTurns = intent?.getIntExtra("JAIL_TURNS", 3) ?: 3
-        val taxPrice = intent?.getIntExtra("TAX_PRICE", 200) ?: 200
-
-        GameViewModelFactory(
-            application = application,
-            numPlayers = numPlayers,
-            playerNames = playerNames,
-            initialMinutes = timerMinutes,
-            startMoney = startMoney,
-            passGoMoney = passGoMoney,
-            jailTurns = jailTurns,
-            taxPrice = taxPrice
-        )
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
-        setContent {
-            MonopolyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GameScreen(
-                        viewModel = viewModel,
-                        onExit = {
-                            val intent = Intent(this, MainActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                            startActivity(intent)
-                            finish()
-                        },
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
-    }
-}
+import game.model.box.Property
 
 /**
  * Stateful version of the Game Screen.
@@ -91,6 +55,7 @@ class GameActivity : ComponentActivity() {
 fun GameScreen(
     viewModel: GameViewModel,
     onExit: () -> Unit,
+    onResults: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -143,8 +108,8 @@ fun GameScreen(
     // Send the end message if is a winner
     LaunchedEffect(viewModel.goToGameResults) {
         if (viewModel.goToGameResults) {
-            // Send log
-            sendEndGameLog(context, viewModel.logBuilder)
+            // Close the game
+            onResults()
         }
     }
 
@@ -182,6 +147,7 @@ fun GameScreen(
         canNextTurn = viewModel.canNextTurn,
         currentDiceRoll = viewModel.dice,
         canRoll = viewModel.canRoll,
+        logEntries = viewModel.logEntries,
         modifier = modifier
     )
 
@@ -270,8 +236,138 @@ fun getCardIconByName(name: String): Int {
  * Stateless version of the Game Screen.
  * Handles layout and dispatches actions based on orientation.
  */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun GameContent(
+    isPortrait: Boolean,
+    initialMinutes: Int,
+    secondsRemaining: Long,
+    onExit: () -> Unit,
+    topGameBoxes: List<GameBox>,
+    bottomGameBoxes: List<GameBox>,
+    leftGameBoxes: List<GameBox>,
+    rightGameBoxes: List<GameBox>,
+    allPlayers: List<Player>,
+    currentPlayerName: String,
+    currentPlayerId: Int,
+    currentPlayerMoney: Int,
+    ownedPropertyIcons: List<Int>,
+    onBuyProperty: () -> Unit,
+    onBuyHouse: () -> Unit,
+    onNextTurn: () -> Unit,
+    onRollDice: () -> Unit,
+    gameMessage: String,
+    canBuyProperty: Boolean,
+    canBuyHouse: Boolean,
+    canNextTurn: Boolean,
+    currentDiceRoll: Int?,
+    canRoll: Boolean,
+    logEntries: List<String> = emptyList(),
+    modifier: Modifier = Modifier
+) {
+    // Use ListDetailPaneScaffold for adaptive bi-panel layout
+    // On tablets: detailPane (wider) = game, listPane (narrower) = log
+    // On smartphones: only listPane is shown (mono-panel), so we put the game there too
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+    val baseDirective = calculatePaneScaffoldDirective(adaptiveInfo)
+    val isTablet = adaptiveInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+
+    val customDirective = PaneScaffoldDirective(
+        maxHorizontalPartitions = if (isTablet) 2 else 1,
+        horizontalPartitionSpacerSize = 0.dp,
+        maxVerticalPartitions = baseDirective.maxVerticalPartitions,
+        verticalPartitionSpacerSize = 0.dp,
+        defaultPanePreferredWidth = 200.dp,
+        excludedBounds = emptyList()
+    )
+    val navigator = rememberListDetailPaneScaffoldNavigator<Nothing>(
+        scaffoldDirective = customDirective
+    )
+
+    // Check if the detail pane is visible (tablet bi-panel mode)
+    val isDetailVisible = navigator.scaffoldValue[ListDetailPaneScaffoldRole.Detail] ==
+            PaneAdaptedValue.Expanded
+
+    ListDetailPaneScaffold(
+        directive = navigator.scaffoldDirective,
+        value = navigator.scaffoldValue,
+        listPane = {
+            // On tablets: listPane = log (narrower, ~1/4 of screen)
+            // On smartphones: listPane = game (full screen, mono-panel)
+            if (isDetailVisible) {
+                // Tablet: show log in the narrower list pane
+                GameLogPanel(
+                    logEntries = logEntries,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // Smartphone: show the game (mono-panel, no log)
+                GamePanel(
+                    isPortrait = isPortrait,
+                    initialMinutes = initialMinutes,
+                    secondsRemaining = secondsRemaining,
+                    onExit = onExit,
+                    topGameBoxes = topGameBoxes,
+                    bottomGameBoxes = bottomGameBoxes,
+                    leftGameBoxes = leftGameBoxes,
+                    rightGameBoxes = rightGameBoxes,
+                    allPlayers = allPlayers,
+                    currentPlayerName = currentPlayerName,
+                    currentPlayerId = currentPlayerId,
+                    currentPlayerMoney = currentPlayerMoney,
+                    ownedPropertyIcons = ownedPropertyIcons,
+                    gameMessage = gameMessage,
+                    onRollDice = onRollDice,
+                    onBuyProperty = onBuyProperty,
+                    onBuyHouse = onBuyHouse,
+                    onNextTurn = onNextTurn,
+                    canBuyProperty = canBuyProperty,
+                    canBuyHouse = canBuyHouse,
+                    canNextTurn = canNextTurn,
+                    currentDiceRoll = currentDiceRoll,
+                    canRoll = canRoll,
+                    modifier = modifier
+                )
+            }
+        },
+        detailPane = {
+            // Tablet: detailPane = game (wider, ~3/4 of screen)
+            GamePanel(
+                isPortrait = isPortrait,
+                initialMinutes = initialMinutes,
+                secondsRemaining = secondsRemaining,
+                onExit = onExit,
+                topGameBoxes = topGameBoxes,
+                bottomGameBoxes = bottomGameBoxes,
+                leftGameBoxes = leftGameBoxes,
+                rightGameBoxes = rightGameBoxes,
+                allPlayers = allPlayers,
+                currentPlayerName = currentPlayerName,
+                currentPlayerId = currentPlayerId,
+                currentPlayerMoney = currentPlayerMoney,
+                ownedPropertyIcons = ownedPropertyIcons,
+                gameMessage = gameMessage,
+                onRollDice = onRollDice,
+                onBuyProperty = onBuyProperty,
+                onBuyHouse = onBuyHouse,
+                onNextTurn = onNextTurn,
+                canBuyProperty = canBuyProperty,
+                canBuyHouse = canBuyHouse,
+                canNextTurn = canNextTurn,
+                currentDiceRoll = currentDiceRoll,
+                canRoll = canRoll,
+                modifier = modifier
+            )
+        },
+        modifier = Modifier.fillMaxSize()
+    )
+}
+
+/**
+ * Helper composable that renders the game board in the appropriate orientation.
+ */
+@Composable
+fun GamePanel(
     isPortrait: Boolean,
     initialMinutes: Int,
     secondsRemaining: Long,
@@ -352,6 +448,79 @@ fun GameContent(
     }
 }
 
+/**
+ * Game Log Panel - Shows the progressive log of the game.
+ * Displayed as the secondary (detail) pane on tablets.
+ */
+@Composable
+fun GameLogPanel(
+    logEntries: List<String>,
+    modifier: Modifier = Modifier
+) {
+    val listState = rememberLazyListState()
+
+    // Auto-scroll to the latest log entry
+    LaunchedEffect(logEntries.size) {
+        if (logEntries.isNotEmpty()) {
+            listState.animateScrollToItem(logEntries.size - 1)
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .background(Color(0xFFF5F5F5))
+            .padding(12.dp)
+    ) {
+        // Title
+        Text(
+            text = stringResource(R.string.GameLogTitle),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Log entries list
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            itemsIndexed(logEntries) { index, entry ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            if (index % 2 == 0) Color.White else Color(0xFFEEEEEE),
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Index number
+                    Text(
+                        text = "${index + 1}.",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray,
+                        modifier = Modifier.width(30.dp)
+                    )
+                    // Log message
+                    Text(
+                        text = entry,
+                        fontSize = 13.sp,
+                        color = Color.DarkGray
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun DrawPortrait(
     initialMinutes: Int,
@@ -380,7 +549,7 @@ fun DrawPortrait(
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         // Top Section: Timer, Turn Info and Exit
-        HeaderAreaPortrait(
+        GameHeaderAreaPortrait(
             secondsRemaining = secondsRemaining,
             isTimerEnabled = initialMinutes > 0,
             currentPlayerName = currentPlayerName,
@@ -557,21 +726,14 @@ fun DrawLandscape(
     }
 }
 
-
-private fun sendEndGameLog(context: Context, info: String) {
-    val intent = Intent(context, Results::class.java).apply {
-        putExtra("INFO", info)
-    }
-    context.startActivity(intent)
-
-    // Close this activity (so first we need to cast the context for do it)
-    (context as? ComponentActivity)?.finish()
-}
-
-@Preview(showBackground = true, widthDp = 800, heightDp = 400)
+@Preview(showBackground = true, widthDp = 1920, heightDp = 1080)
 @Composable
 fun GameScreenLandscapePreview() {
     MonopolyTheme {
+        val dummyBoxes = listOf(
+            Property(position = 0, name = "Tomato Town", price = 200, rent = 20, housePrice = 50)
+        )
+
 
         GameContent(
             isPortrait = false,
@@ -579,10 +741,11 @@ fun GameScreenLandscapePreview() {
             secondsRemaining = 3600L,
             onExit = {},
 
-            topGameBoxes = emptyList(),
-            bottomGameBoxes = emptyList(),
-            leftGameBoxes = emptyList(),
-            rightGameBoxes = emptyList(),
+
+            topGameBoxes = dummyBoxes,
+            bottomGameBoxes = dummyBoxes,
+            leftGameBoxes = dummyBoxes,
+            rightGameBoxes = dummyBoxes,
 
             allPlayers = listOf(
                 Player(id = 0, name = "p1", money = 1500),

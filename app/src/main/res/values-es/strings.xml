@@ -85,4 +85,19 @@
     <string name="MsgStartGame">La partida ha empezado, P1 puede empezar a tirar los dados</string>
     <string name="SelectWhereBuild">Selecciona dónde construir</string>
     <string name="Cancel">Cancelar</string>
+    <string name="ConfSaved">Configuración guardada</string>
+    <string name="Save">Guardar</string>
+    <string name="GameLogTitle">Registro del juego</string>
+    <string name="OtherGames">Otras partidas</string>
+    <string name="GameDetailTitle">Detalles de la partida …</string>
+    <string name="GameDetailWinner">Ganador: %1$s</string>
+    <string name="GameDetailTurns">Turnos: %1$d</string>
+    <string name="GameDetailDuration">Duración: %1$d min</string>
+    <string name="GameDetailDate">Fecha: %1$s</string>
+    <string name="SelectGamePrompt">Selecciona una partida para ver los detalles</string>
+    <string name="ViewDetailAction">Ver detalles</string>
+    <string name="ViewListAction">Visualizar lista</string>
+    <string name="StartingMusic">Empezando la música</string>
+    <string name="StoppingMusic">Parando la música</string>
+    <string name="ButtonMenu">Volver al menu</string>
 </resources>

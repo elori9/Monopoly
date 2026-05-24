@@ -1,23 +1,13 @@
 package com.example.monopoly.ui.screens
 
-import android.content.Intent
 import android.content.res.Configuration
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,31 +23,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
+import com.example.monopoly.ui.components.ScreensHeaderArea
 import com.example.monopoly.ui.theme.MonopolyTheme
 import com.example.monopoly.ui.viewmodel.ConfigActivityViewModel
-
-class ConfigActivity : ComponentActivity() {
-    // Use ViewModel to manage state
-    private val viewModel: ConfigActivityViewModel by viewModels()
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MonopolyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    ConfigScreen(modifier = Modifier.padding(innerPadding), viewModel = viewModel)
-                }
-            }
-        }
-    }
-}
 
 /**
  * Stateful Composable that manages the state for the configuration screen.
  */
 @Composable
-fun ConfigScreen(modifier: Modifier = Modifier, viewModel: ConfigActivityViewModel) {
+fun ConfigScreen(
+    modifier: Modifier = Modifier,
+    viewModel: ConfigActivityViewModel,
+    onNavigateBack: () -> Unit,
+) {
     val context = LocalContext.current
 
     // Detect orientation
@@ -73,30 +51,7 @@ fun ConfigScreen(modifier: Modifier = Modifier, viewModel: ConfigActivityViewMod
         onPlayerNameChange = { index, name -> viewModel.updatePlayerName(index, name) },
         onTimerToggle = { viewModel.toggleTimer(it) },
         onTimeLimitChange = { viewModel.updateTimeLimit(it) },
-        onExit = {
-            val intent = Intent(context, MainActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            context.startActivity(intent)
-        },
-        onStartGame = {
-            if (!viewModel.areAllNamesFilled()) {
-                Toast.makeText(context, "Please enter all player names", Toast.LENGTH_SHORT).show()
-            } else {
-                val intent = Intent(context, GameActivity::class.java).apply {
-                    putExtra("NUM_PLAYERS", viewModel.numPlayers)
-                    putStringArrayListExtra(
-                        "PLAYER_NAMES",
-                        ArrayList(viewModel.getSelectedPlayerNames())
-                    )
-                    putExtra("TIME_LIMIT", viewModel.getFinalTimeLimit())
-                    putExtra("STARTING_MONEY", viewModel.startMoney.toIntOrNull() ?: 2000)
-                    putExtra("PASS_GO_MONEY", viewModel.passGoMoney.toIntOrNull() ?: 200)
-                    putExtra("JAIL_TURNS", viewModel.jailTurns.toIntOrNull() ?: 3)
-                    putExtra("TAX_PRICE", viewModel.taxesPrice.toIntOrNull() ?: 200)
-                }
-                context.startActivity(intent)
-            }
-        },
+        onExit = { onNavigateBack() },
         isAdvancedExpanded = viewModel.advancedConfigEnabled,
         startingMoney = viewModel.startMoney,
         passGoMoney = viewModel.passGoMoney,
@@ -107,6 +62,11 @@ fun ConfigScreen(modifier: Modifier = Modifier, viewModel: ConfigActivityViewMod
         onPassGoMoneyChange = { viewModel.updatePassGoMoney(it) },
         onJailTurnsChange = { viewModel.updateJailTurns(it) },
         onTaxesPriceChange = { viewModel.updateTaxesPrice(it) },
+        onSave = {
+            viewModel.saveSettings()
+            Toast.makeText(context, context.getString(R.string.ConfSaved), Toast.LENGTH_SHORT)
+                .show()
+        },
         modifier = modifier
     )
 }
@@ -126,7 +86,6 @@ fun ConfigContent(
     onTimerToggle: (Boolean) -> Unit,
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
-    onStartGame: () -> Unit,
     isAdvancedExpanded: Boolean,
     startingMoney: String,
     passGoMoney: String,
@@ -137,6 +96,7 @@ fun ConfigContent(
     onPassGoMoneyChange: (String) -> Unit,
     onJailTurnsChange: (String) -> Unit,
     onTaxesPriceChange: (String) -> Unit,
+    onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (isPortrait) {
@@ -150,7 +110,6 @@ fun ConfigContent(
             onTimerToggle = onTimerToggle,
             onTimeLimitChange = onTimeLimitChange,
             onExit = onExit,
-            onStartGame = onStartGame,
             isAdvancedExpanded = isAdvancedExpanded,
             startingMoney = startingMoney,
             passGoMoney = passGoMoney,
@@ -161,6 +120,7 @@ fun ConfigContent(
             onPassGoMoneyChange = onPassGoMoneyChange,
             onJailTurnsChange = onJailTurnsChange,
             onTaxesPriceChange = onTaxesPriceChange,
+            onSave = onSave,
             modifier = modifier
         )
     } else {
@@ -174,7 +134,6 @@ fun ConfigContent(
             onTimerToggle = onTimerToggle,
             onTimeLimitChange = onTimeLimitChange,
             onExit = onExit,
-            onStartGame = onStartGame,
             isAdvancedExpanded = isAdvancedExpanded,
             startingMoney = startingMoney,
             passGoMoney = passGoMoney,
@@ -185,6 +144,7 @@ fun ConfigContent(
             onPassGoMoneyChange = onPassGoMoneyChange,
             onJailTurnsChange = onJailTurnsChange,
             onTaxesPriceChange = onTaxesPriceChange,
+            onSave = onSave,
             modifier = modifier
         )
     }
@@ -201,7 +161,6 @@ fun DrawConfigPortrait(
     onTimerToggle: (Boolean) -> Unit,
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
-    onStartGame: () -> Unit,
     isAdvancedExpanded: Boolean,
     startingMoney: String,
     passGoMoney: String,
@@ -212,6 +171,7 @@ fun DrawConfigPortrait(
     onPassGoMoneyChange: (String) -> Unit,
     onJailTurnsChange: (String) -> Unit,
     onTaxesPriceChange: (String) -> Unit,
+    onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -222,7 +182,11 @@ fun DrawConfigPortrait(
     ) {
         // Header
         item {
-            ConfigHeader(onExit = onExit)
+            ScreensHeaderArea(
+                onExit = onExit,
+                modifier = Modifier,
+                title = stringResource(id = R.string.Configuration)
+            )
             Spacer(modifier = Modifier.height(24.dp))
         }
 
@@ -273,11 +237,8 @@ fun DrawConfigPortrait(
         }
 
         item {
-            // Start button
-            StartGameButton(
-                isEnabled = numPlayers > 0,
-                onClick = onStartGame
-            )
+            SaveSettingsButton(onClick = onSave)
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -293,7 +254,6 @@ fun DrawConfigLandscape(
     onTimerToggle: (Boolean) -> Unit,
     onTimeLimitChange: (String) -> Unit,
     onExit: () -> Unit,
-    onStartGame: () -> Unit,
     isAdvancedExpanded: Boolean,
     startingMoney: String,
     passGoMoney: String,
@@ -304,6 +264,7 @@ fun DrawConfigLandscape(
     onPassGoMoneyChange: (String) -> Unit,
     onJailTurnsChange: (String) -> Unit,
     onTaxesPriceChange: (String) -> Unit,
+    onSave: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -311,7 +272,11 @@ fun DrawConfigLandscape(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        ConfigHeader(onExit = onExit)
+        ScreensHeaderArea(
+            onExit = onExit,
+            modifier = Modifier,
+            title = stringResource(id = R.string.Configuration)
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
@@ -375,43 +340,12 @@ fun DrawConfigLandscape(
                     )
                 }
 
-                // Start game button
                 item {
-                    StartGameButton(
-                        isEnabled = numPlayers > 0,
-                        onClick = onStartGame,
-                        modifier = Modifier.padding(bottom = 0.dp) // No bottom padding needed in landscape
-                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    SaveSettingsButton(onClick = onSave)
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun ConfigHeader(onExit: () -> Unit) {
-    Column {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(id = R.string.Configuration),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-            IconButton(onClick = onExit) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Exit",
-                    tint = Color.Red,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-        }
-        HorizontalDivider(thickness = 2.dp, color = Color.Black)
     }
 }
 
@@ -551,6 +485,26 @@ fun StartGameButton(
 }
 
 @Composable
+fun SaveSettingsButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .height(56.dp)
+            .width(200.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF4CAF50),
+            contentColor = Color.White
+        )
+    ) {
+        Text(text = stringResource(R.string.Save), fontSize = 20.sp, color = Color.White)
+    }
+}
+
+@Composable
 fun AdvancedConfiguration(
     isEnabled: Boolean,
     startingMoney: String,
@@ -669,7 +623,6 @@ fun AdvancedConfigPreview() {
                 onTimerToggle = { timerEnabled = it },
                 onTimeLimitChange = { timeText = it },
                 onExit = { },
-                onStartGame = {},
                 isAdvancedExpanded = advancedExpanded,
                 startingMoney = startingMoney,
                 passGoMoney = passGoMoney,
@@ -679,7 +632,8 @@ fun AdvancedConfigPreview() {
                 onStartingMoneyChange = { startingMoney = it },
                 onPassGoMoneyChange = { passGoMoney = it },
                 onJailTurnsChange = { jailTurns = it },
-                onTaxesPriceChange = { taxesPrice = it }
+                onTaxesPriceChange = { taxesPrice = it },
+                onSave = { }
             )
         }
     }

@@ -2,11 +2,7 @@ package com.example.monopoly.ui.screens
 
 import android.app.SearchManager
 import android.content.Intent
-import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -32,42 +28,33 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.monopoly.R
-import com.example.monopoly.ui.theme.MonopolyTheme
 import coil.compose.AsyncImage
+import androidx.activity.compose.BackHandler
 
 object Constants {
     const val GITHUB_LINK = "https://github.com/elori9/Monopoly"
-}
-
-class HelpActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            MonopolyTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HelpScreen(modifier = Modifier.padding(innerPadding))
-                }
-            }
-        }
-    }
 }
 
 /**
  * Stateful function
  */
 @Composable
-fun HelpScreen(modifier: Modifier = Modifier) {
+fun HelpScreen(
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
     var expandedImageRes by remember { mutableStateOf<Int?>(null) }
 
+    // This component will be enabled when the image is clicked and will be disabled when the back button is pressed
+    // So you can just go back when you are not looking at the image
+    BackHandler(enabled = expandedImageRes != null) {
+        expandedImageRes = null
+    }
+
     Box(modifier = modifier.fillMaxSize()) {
         HelpContent(
-            onBackClick = {
-                val intent = Intent(context, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-                context.startActivity(intent)
-            },
+            onBackClick = { onNavigateBack() },
             onBoxClick = { resId -> expandedImageRes = resId },
             onClickButton = {
                 Toast.makeText(
