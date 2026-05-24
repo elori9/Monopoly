@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -287,6 +288,31 @@ fun DetailReg(
                 fontSize = 15.sp,
                 color = Color.DarkGray
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Logs
+            Text(
+                text = stringResource(R.string.GameLogTitle),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .background(Color(0xFFF5F5F5), RoundedCornerShape(8.dp))
+                    .padding(8.dp)
+            ) {
+                Text(
+                    text = log.logLine,
+                    fontSize = 14.sp,
+                    color = Color.DarkGray,
+                    modifier = Modifier.verticalScroll(androidx.compose.foundation.rememberScrollState())
+                )
+            }
         } else {
             // No game selected placeholder
             Text(
@@ -295,10 +321,10 @@ fun DetailReg(
                 fontSize = 16.sp,
                 color = Color.Gray
             )
+            Spacer(modifier = Modifier.weight(1f))
         }
 
         if (showBackButton) {
-            Spacer(modifier = Modifier.weight(1f))
             Button(
                 onClick = onNavigateBack,
                 modifier = Modifier
