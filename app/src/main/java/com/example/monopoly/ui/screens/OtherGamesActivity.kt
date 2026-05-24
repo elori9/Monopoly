@@ -1,5 +1,6 @@
 package com.example.monopoly.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -99,6 +100,12 @@ fun OtherGamesContent(
         scaffoldDirective = customDirective
     )
     val coroutineScope = rememberCoroutineScope()
+
+    BackHandler(enabled = navigator.canNavigateBack()) {
+        coroutineScope.launch {
+            navigator.navigateBack()
+        }
+    }
 
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
